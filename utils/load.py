@@ -32,6 +32,7 @@ def get_imgs_and_masks(ids, dir_img, dir_mask, scale):
     imgs = to_cropped_imgs(ids, dir_img, '.jpg', scale)
 
     # need to transform from HWC to CHW
+    # The map() function executes a specified function for each item in a iterable. The item is sent to the function as a parameter.
     imgs_switched = map(hwc_to_chw, imgs)
     imgs_normalized = map(normalize, imgs_switched)
 
