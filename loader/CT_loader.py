@@ -92,6 +92,12 @@ class CTLoader(data.Dataset):
         target_path = pjoin(self.root, "fixed_data")
         if not os.path.exists(target_path):
             os.makedirs(target_path)
+            os.makedirs(pjoin(target_path, "ct"))
+            os.makedirs(pjoin(target_path, "seg"))
+            os.makedirs(pjoin(target_path, "ct", "train"))
+            os.makedirs(pjoin(target_path, "ct", "val"))
+            os.makedirs(pjoin(target_path, "seg", "train"))
+            os.makedirs(pjoin(target_path, "seg", "val"))
 
         pre_encoded = glob.glob(pjoin(target_path, "*.png"))
         expected = np.unique(self.files["train"] + self.files["val"]).size
