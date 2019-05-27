@@ -24,7 +24,6 @@ class CTLoader(data.Dataset):
         is_transform=False,
         img_size=512,
         augmentations=None,
-        img_norm=True,
         test_mode=False,
     ):
         self.root = root
@@ -32,7 +31,6 @@ class CTLoader(data.Dataset):
         self.split = split
         self.is_transform = is_transform
         self.augmentations = augmentations
-        self.img_norm = img_norm
         self.test_mode = test_mode
         self.n_classes = 3
         #self.mean = np.array([104.00699, 116.66877, 122.67892])
@@ -64,6 +62,8 @@ class CTLoader(data.Dataset):
         lbl_path = pjoin(self.root, "fixed_data", "seg", self.split, "seg" + im_name)
         im = Image.open(im_path)
         lbl = Image.open(lbl_path)
+        im = torch.from_numpy(np.array(im)/255.)
+        lbl = torch.from_numpy(np.array(lbl)).long()
         if self.augmentations is not None:
             im, lbl = self.augmentations(im, lbl)
         if self.is_transform:
