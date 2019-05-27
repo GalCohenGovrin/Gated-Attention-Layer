@@ -111,7 +111,7 @@ class CTLoader(data.Dataset):
                     img_path = pjoin(self.root, "train_val", "ct", split, img_name)
                     seg_path = pjoin(self.root, "train_val", "seg", split, seg_name)
                     
-                    img = np.array(Image.open(img_path).convert('L'))/255.
+                    img = np.array(Image.open(img_path).convert('L'))
                     seg = np.array(Image.open(seg_path).convert('L'))
                     seg[seg == 127] = 1
                     seg[seg == 255] = 2
