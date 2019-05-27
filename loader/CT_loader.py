@@ -113,8 +113,8 @@ class CTLoader(data.Dataset):
                     
                     img = np.array(Image.open(img_path).convert('L'))/255.
                     seg = np.array(Image.open(seg_path).convert('L'))
-                    seg[fixed_seg == 127] = 1
-                    seg[fixed_seg == 255] = 2
+                    seg[seg == 127] = 1
+                    seg[seg == 255] = 2
                     
                     fixed_img = Image.fromarray(img)
                     fixed_seg = Image.fromarray(seg)
