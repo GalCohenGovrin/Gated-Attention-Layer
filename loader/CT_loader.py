@@ -55,7 +55,7 @@ class CTLoader(data.Dataset):
         self.augmentations = augmentations
         self.img_norm = img_norm
         self.test_mode = test_mode
-        self.n_classes = 21
+        self.n_classes = 3
         self.mean = np.array([104.00699, 116.66877, 122.67892])
         self.files = collections.defaultdict(list)
         self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
@@ -66,7 +66,7 @@ class CTLoader(data.Dataset):
                 file_list = tuple(open(path, "r"))
                 file_list = [id_.rstrip() for id_ in file_list]
                 self.files[split] = file_list
-            #self.setup_annotations()
+            self.setup_annotations()
 
         self.tf = transforms.Compose(
             [
@@ -77,11 +77,12 @@ class CTLoader(data.Dataset):
 
     def __len__(self):
         return len(self.files[self.split])
-
+    
+    #TODO: fix path to correct data
     def __getitem__(self, index):
         im_name = self.files[self.split][index]
-        im_path = pjoin(self.root, "ct", self.split, "ct" + im_name)
-        lbl_path = pjoin(self.root, "seg", self.split, "seg" + im_name)
+        im_path = pjoin(self.root, "train_val", "ct", self.split, "ct" + im_name)
+        lbl_path = pjoin(self.root, "train_val", "seg", self.split, "seg" + im_name)
         im = Image.open(im_path)
         lbl = Image.open(lbl_path)
         if self.augmentations is not None:
@@ -176,7 +177,48 @@ class CTLoader(data.Dataset):
         else:
             return rgb
 
+    def setup_annotations(self):
+        """Sets up Berkley annotations by adding image indices to the
+        `train_aug` split and pre-encode all segmentation labels into the
+        common label_mask format (if this has not already been done). This
+        function also defines the `train_aug` and `train_aug_val` data splits
+        according to the description in the class docstring
+        """
+        #sbd_path = self.sbd_path
+        target_path = pjoin(self.root, "fixed_data")
+        if not os.path.exists(target_path):
+            os.makedirs(target_path)
+        #path = pjoin(sbd_path, "dataset/train.txt")
+        #sbd_train_list = tuple(open(path, "r"))
+        #sbd_train_list = [id_.rstrip() for id_ in sbd_train_list]
+        #rain_aug = self.files["train"] + sbd_train_list
 
+        # keep unique elements (stable)
+        train_aug = [train_aug[i] for i in sorted(np.unique(train_aug, return_index=True)[1])]
+        self.files["train_aug"] = train_aug
+        set_diff = set(self.files["val"]) - set(train_aug)  # remove overlap
+        self.files["train_aug_val"] = list(set_diff)
+
+        pre_encoded = glob.glob(pjoin(target_path, "*.png"))
+        expected = np.unique(self.files["train"] + self.files["val"]).size
+
+        if len(pre_encoded) != expected:
+            print("Pre-encoding segmentation masks...")
+            for ii in tqdm(sbd_train_list):
+                lbl_path = pjoin(sbd_path, "dataset/cls", ii + ".mat")
+                data = io.loadmat(lbl_path)
+                lbl = data["GTcls"][0]["Segmentation"][0].astype(np.int32)
+                lbl = m.toimage(lbl, high=lbl.max(), low=lbl.min())
+                m.imsave(pjoin(target_path, ii + ".png"), lbl)
+
+            for ii in tqdm(self.files["trainval"]):
+                fname = ii + ".png"
+                lbl_path = pjoin(self.root, "SegmentationClass", fname)
+                lbl = self.encode_segmap(m.imread(lbl_path))
+                lbl = m.toimage(lbl, high=lbl.max(), low=lbl.min())
+                m.imsave(pjoin(target_path, fname), lbl)
+
+        assert expected == 9733, "unexpected dataset sizes"
 
 
 # Leave code for debugging purposes
