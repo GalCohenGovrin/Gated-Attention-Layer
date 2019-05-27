@@ -111,13 +111,13 @@ class CTLoader(data.Dataset):
                     img_path = pjoin(self.root, "train_val", "ct", split, img_name)
                     seg_path = pjoin(self.root, "train_val", "seg", split, seg_name)
                     
-                    fixed_img = np.array(Image.open(img_path).convert('L'))/255.
-                    fixed_seg = np.array(Image.open(seg_path).convert('L'))
-                    fixed_seg[fixed_seg == 127] = 1
-                    fixed_seg[fixed_seg == 255] = 2
+                    img = np.array(Image.open(img_path).convert('L'))/255.
+                    seg = np.array(Image.open(seg_path).convert('L'))
+                    seg[fixed_seg == 127] = 1
+                    seg[fixed_seg == 255] = 2
                     
-                    fixed_img = Image.fromarray(fixed_img)
-                    fixed_seg = Image.fromarray(fixed_seg)
+                    fixed_img = Image.fromarray(img)
+                    fixed_seg = Image.fromarray(seg)
                     
                     fixed_img.save(pjoin(target_path, "ct", split, img_name), "PNG")
                     fixed_seg.save(pjoin(target_path, "seg", split, seg_name), "PNG")
