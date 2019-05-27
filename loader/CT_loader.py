@@ -96,7 +96,7 @@ class CTLoader(data.Dataset):
         expected = np.unique(self.files["train"] + self.files["val"]).size
 
         if len(pre_encoded) != expected:
-            print("Pre-encoding segmentation masks..." + len(pre_encoded) + " != " + expected )
+            print("Pre-encoding segmentation masks..." + str(len(pre_encoded)) + " != " + expected )
             for split in ["train", "val"]:
                 for ii in tqdm(self.files[split]):
                     img_name = "ct" + ii
