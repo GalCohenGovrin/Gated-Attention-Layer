@@ -62,7 +62,9 @@ class CTLoader(data.Dataset):
         im = Image.open(im_path)
         lbl = Image.open(lbl_path)
         im = torch.from_numpy(np.array(im)/255.)
+        im = torch.unsqueeze(im, 0)
         lbl = torch.from_numpy(np.array(lbl)).long()
+        lbl = torch.unsqueeze(lbl, 0)
         if self.augmentations is not None:
             im, lbl = self.augmentations(im, lbl)
         if self.is_transform:
