@@ -83,12 +83,7 @@ class CTLoader(data.Dataset):
         return img, lbl
 
     def setup_annotations(self):
-        """Sets up Berkley annotations by adding image indices to the
-        `train_aug` split and pre-encode all segmentation labels into the
-        common label_mask format (if this has not already been done). This
-        function also defines the `train_aug` and `train_aug_val` data splits
-        according to the description in the class docstring
-        """
+
         target_path = pjoin(self.root, "fixed_data")
         if not os.path.exists(target_path):
             os.makedirs(target_path)
@@ -122,15 +117,6 @@ class CTLoader(data.Dataset):
                     fixed_img.save(pjoin(target_path, "ct", split, img_name), "PNG")
                     fixed_seg.save(pjoin(target_path, "seg", split, seg_name), "PNG")
                     
-                    #fixed_img = m.toimage(fixed_img, high=fixed_img.max(), low=fixed_img.min())
-                    #fixed_seg = m.toimage(fixed_seg, high=fixed_seg.max(), low=fixed_seg.min())
-                    
-                    #m.imsave(pjoin(target_path, "ct", split, img_name), fixed_img)
-                    #m.imsave(pjoin(target_path, "seg", split, seg_name), fixed_seg)
-                    
-                
-
-        # assert expected == 9733, "unexpected dataset sizes"
 
 
 # Leave code for debugging purposes
