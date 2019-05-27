@@ -110,11 +110,17 @@ class CTLoader(data.Dataset):
                     fixed_seg[fixed_seg == 127] = 1
                     fixed_seg[fixed_seg == 255] = 2
                     
-                    fixed_img = m.toimage(fixed_img, high=fixed_img.max(), low=fixed_img.min())
-                    fixed_seg = m.toimage(fixed_seg, high=fixed_seg.max(), low=fixed_seg.min())
+                    fixed_img = Image.fromarray(fixed_img)
+                    fixed_seg = Image.fromarray(fixed_seg)
                     
-                    m.imsave(pjoin(target_path, "ct", split, img_name), fixed_img)
-                    m.imsave(pjoin(target_path, "seg", split, seg_name), fixed_seg)
+                    fixed_img.save(pjoin(target_path, "ct", split, img_name))
+                    fixed_seg.save(pjoin(target_path, "seg", split, seg_name))
+                    
+                    #fixed_img = m.toimage(fixed_img, high=fixed_img.max(), low=fixed_img.min())
+                    #fixed_seg = m.toimage(fixed_seg, high=fixed_seg.max(), low=fixed_seg.min())
+                    
+                    #m.imsave(pjoin(target_path, "ct", split, img_name), fixed_img)
+                    #m.imsave(pjoin(target_path, "seg", split, seg_name), fixed_seg)
                     
                 
 
