@@ -102,81 +102,6 @@ class CTLoader(data.Dataset):
         lbl[lbl == 255] = 0
         return img, lbl
 
-    def get_pascal_labels(self):
-        """Load the mapping that associates pascal classes with label colors
-        Returns:
-            np.ndarray with dimensions (21, 3)
-        """
-        return np.asarray(
-            [
-                [0, 0, 0],
-                [128, 0, 0],
-                [0, 128, 0],
-                [128, 128, 0],
-                [0, 0, 128],
-                [128, 0, 128],
-                [0, 128, 128],
-                [128, 128, 128],
-                [64, 0, 0],
-                [192, 0, 0],
-                [64, 128, 0],
-                [192, 128, 0],
-                [64, 0, 128],
-                [192, 0, 128],
-                [64, 128, 128],
-                [192, 128, 128],
-                [0, 64, 0],
-                [128, 64, 0],
-                [0, 192, 0],
-                [128, 192, 0],
-                [0, 64, 128],
-            ]
-        )
-
-    def encode_segmap(self, mask):
-        """Encode segmentation label images as pascal classes
-        Args:
-            mask (np.ndarray): raw segmentation label image of dimension
-              (M, N, 3), in which the Pascal classes are encoded as colours.
-        Returns:
-            (np.ndarray): class map with dimensions (M,N), where the value at
-            a given location is the integer denoting the class index.
-        """
-        mask = mask.astype(int)
-        label_mask = np.zeros((mask.shape[0], mask.shape[1]), dtype=np.int16)
-        for ii, label in enumerate(self.get_pascal_labels()):
-            label_mask[np.where(np.all(mask == label, axis=-1))[:2]] = ii
-        label_mask = label_mask.astype(int)
-        return label_mask
-
-    def decode_segmap(self, label_mask, plot=False):
-        """Decode segmentation class labels into a color image
-        Args:
-            label_mask (np.ndarray): an (M,N) array of integer values denoting
-              the class label at each spatial location.
-            plot (bool, optional): whether to show the resulting color image
-              in a figure.
-        Returns:
-            (np.ndarray, optional): the resulting decoded color image.
-        """
-        label_colours = self.get_pascal_labels()
-        r = label_mask.copy()
-        g = label_mask.copy()
-        b = label_mask.copy()
-        for ll in range(0, self.n_classes):
-            r[label_mask == ll] = label_colours[ll, 0]
-            g[label_mask == ll] = label_colours[ll, 1]
-            b[label_mask == ll] = label_colours[ll, 2]
-        rgb = np.zeros((label_mask.shape[0], label_mask.shape[1], 3))
-        rgb[:, :, 0] = r / 255.0
-        rgb[:, :, 1] = g / 255.0
-        rgb[:, :, 2] = b / 255.0
-        if plot:
-            plt.imshow(rgb)
-            plt.show()
-        else:
-            return rgb
-
     def setup_annotations(self):
         """Sets up Berkley annotations by adding image indices to the
         `train_aug` split and pre-encode all segmentation labels into the
@@ -184,41 +109,36 @@ class CTLoader(data.Dataset):
         function also defines the `train_aug` and `train_aug_val` data splits
         according to the description in the class docstring
         """
-        #sbd_path = self.sbd_path
         target_path = pjoin(self.root, "fixed_data")
         if not os.path.exists(target_path):
             os.makedirs(target_path)
-        #path = pjoin(sbd_path, "dataset/train.txt")
-        #sbd_train_list = tuple(open(path, "r"))
-        #sbd_train_list = [id_.rstrip() for id_ in sbd_train_list]
-        #rain_aug = self.files["train"] + sbd_train_list
-
-        # keep unique elements (stable)
-        train_aug = [train_aug[i] for i in sorted(np.unique(train_aug, return_index=True)[1])]
-        self.files["train_aug"] = train_aug
-        set_diff = set(self.files["val"]) - set(train_aug)  # remove overlap
-        self.files["train_aug_val"] = list(set_diff)
 
         pre_encoded = glob.glob(pjoin(target_path, "*.png"))
         expected = np.unique(self.files["train"] + self.files["val"]).size
 
         if len(pre_encoded) != expected:
             print("Pre-encoding segmentation masks...")
-            for ii in tqdm(sbd_train_list):
-                lbl_path = pjoin(sbd_path, "dataset/cls", ii + ".mat")
-                data = io.loadmat(lbl_path)
-                lbl = data["GTcls"][0]["Segmentation"][0].astype(np.int32)
-                lbl = m.toimage(lbl, high=lbl.max(), low=lbl.min())
-                m.imsave(pjoin(target_path, ii + ".png"), lbl)
+            for split in ["train", "val"]:
+                for ii in tqdm(self.files[split]):
+                    img_name = "ct" + ii
+                    seg_name = "seg" + ii
+                    img_path = pjoin(self.root, "train_val", "ct", split, img_name)
+                    seg_path = pjoin(self.root, "train_val", "seg", split, seg_name)
+                    
+                    fixed_img = np.array(Image.open(img_path).convert('L'))/255.
+                    fixed_seg = np.array(Image.open(seg_path).convert('L'))
+                    fixed_seg[fixed_seg == 127] = 1
+                    fixed_seg[fixed_seg == 255] = 2
+                    
+                    fixed_img = m.toimage(fixed_img, high=fixed_img.max(), low=fixed_img.min())
+                    fixed_seg = m.toimage(fixed_seg, high=fixed_seg.max(), low=fixed_seg.min())
+                    
+                    m.imsave(pjoin(target_path, "ct", split, img_name), fixed_img)
+                    m.imsave(pjoin(target_path, "seg", split, seg_name), fixed_seg)
+                    
+                
 
-            for ii in tqdm(self.files["trainval"]):
-                fname = ii + ".png"
-                lbl_path = pjoin(self.root, "SegmentationClass", fname)
-                lbl = self.encode_segmap(m.imread(lbl_path))
-                lbl = m.toimage(lbl, high=lbl.max(), low=lbl.min())
-                m.imsave(pjoin(target_path, fname), lbl)
-
-        assert expected == 9733, "unexpected dataset sizes"
+        # assert expected == 9733, "unexpected dataset sizes"
 
 
 # Leave code for debugging purposes
