@@ -27,7 +27,6 @@ class CTLoader(data.Dataset):
         test_mode=False,
     ):
         self.root = root
-        self.sbd_path = sbd_path
         self.split = split
         self.is_transform = is_transform
         self.augmentations = augmentations
