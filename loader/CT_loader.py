@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import glob
 
 from PIL import Image
+from tqdm import tqdm
 from torch.utils import data
 from torchvision import transforms
 
