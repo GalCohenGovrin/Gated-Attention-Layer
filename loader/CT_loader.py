@@ -119,8 +119,8 @@ class CTLoader(data.Dataset):
                     fixed_img = Image.fromarray(fixed_img)
                     fixed_seg = Image.fromarray(fixed_seg)
                     
-                    fixed_img.save(pjoin(target_path, "ct", split, img_name))
-                    fixed_seg.save(pjoin(target_path, "seg", split, seg_name))
+                    fixed_img.save(pjoin(target_path, "ct", split, img_name), "PNG")
+                    fixed_seg.save(pjoin(target_path, "seg", split, seg_name), "PNG")
                     
                     #fixed_img = m.toimage(fixed_img, high=fixed_img.max(), low=fixed_img.min())
                     #fixed_seg = m.toimage(fixed_seg, high=fixed_seg.max(), low=fixed_seg.min())
