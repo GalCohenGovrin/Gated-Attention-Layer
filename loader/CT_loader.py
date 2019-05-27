@@ -20,7 +20,6 @@ class CTLoader(data.Dataset):
     def __init__(
         self,
         root = '/content/Data/',
-        sbd_path=None,
         split="train",
         is_transform=False,
         img_size=512,
@@ -36,7 +35,7 @@ class CTLoader(data.Dataset):
         self.img_norm = img_norm
         self.test_mode = test_mode
         self.n_classes = 3
-        self.mean = np.array([104.00699, 116.66877, 122.67892])
+        #self.mean = np.array([104.00699, 116.66877, 122.67892])
         self.files = collections.defaultdict(list)
         self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
 
@@ -51,7 +50,7 @@ class CTLoader(data.Dataset):
         self.tf = transforms.Compose(
             [
                 transforms.ToTensor(),
-                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+                #transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
             ]
         )
 
@@ -98,7 +97,7 @@ class CTLoader(data.Dataset):
         expected = np.unique(self.files["train"] + self.files["val"]).size
 
         if len(pre_encoded) != expected:
-            print("Pre-encoding segmentation masks...")
+            print("Pre-encoding segmentation masks..." + )
             for split in ["train", "val"]:
                 for ii in tqdm(self.files[split]):
                     img_name = "ct" + ii
