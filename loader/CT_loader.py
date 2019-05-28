@@ -79,7 +79,7 @@ class CTLoader(data.Dataset):
             lbl = lbl.resize((self.img_size[0], self.img_size[1]))
         img = self.tf(img)
         lbl = torch.from_numpy(np.array(lbl)).long()
-        lbl[lbl == 255] = 0
+        
         return img, lbl
 
     def setup_annotations(self):
