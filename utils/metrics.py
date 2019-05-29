@@ -49,7 +49,7 @@ class runningScore(object):
 
     def reset(self):
         self.confusion_matrix = np.zeros((self.n_classes, self.n_classes))
-
+        
 
 class averageMeter(object):
     """Computes and stores the average and current value"""
@@ -68,3 +68,27 @@ class averageMeter(object):
         self.sum += val * n
         self.count += n
         self.avg = self.sum / self.count
+        
+        
+class evalMetrics(object):
+    """Computes and stores the evaluation metrics"""
+
+    def __init__(self):
+        self.reset()
+        
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
+
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count
+        
+    def dice(self, label_trues, label_preds):
+        np_preds = label_preds.cpu().numpy()
+        np_trues = label_trues.cpu().numpy()
+        b, c, h, w = np_preds.shape
