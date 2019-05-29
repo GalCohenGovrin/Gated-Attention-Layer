@@ -168,3 +168,11 @@ class evalMetrics(object):
         recall_lesion = np.average((tp_lesion + 1)/(tp_lesion + 1 + fn_lesion))
         
         return np.array([dice_liver, precision_liver, recall_liver, dice_lesion, precision_lesion, recall_lesion, batch_size])
+    
+    def get_scores(self):
+        return np.array([self.avg_dice_liver,
+        self.avg_precision_liver,
+        self.avg_recall_liver,
+        self.avg_dice_lesion,
+        self.avg_precision_lesion,
+        self.avg_recall_lesion])
