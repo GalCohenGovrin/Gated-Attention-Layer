@@ -135,8 +135,8 @@ class evalMetrics(object):
         
         
         """
-        np_preds = label_preds.cpu().numpy()
-        np_trues = label_trues.cpu().numpy()
+        np_preds = label_preds.cpu().detach().numpy()
+        np_trues = label_trues.cpu().detach().numpy()
         
         batch_size = np_trues.shape[0]
         
