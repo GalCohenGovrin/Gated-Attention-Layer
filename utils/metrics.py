@@ -2,7 +2,7 @@
 # https://github.com/wkentaro/pytorch-fcn/blob/master/torchfcn/utils.py
 
 import numpy as np
-
+import torch
 
 class runningScore(object):
     def __init__(self, n_classes):
@@ -77,16 +77,56 @@ class evalMetrics(object):
         self.reset()
         
     def reset(self):
-        self.val = 0
-        self.avg = 0
-        self.sum = 0
+        self.val_dice_liver = 0
+        self.val_precision_liver = 0
+        self.val_recall_liver = 0
+        
+        self.val_dice_lesion = 0
+        self.val_precision_lesion = 0
+        self.val_recall_lesion = 0
+        
+        self.avg_dice_liver = 0
+        self.avg_precision_liver = 0
+        self.avg_recall_liver = 0
+        
+        self.avg_dice_lesion = 0
+        self.avg_precision_lesion = 0
+        self.avg_recall_lesion = 0
+        
+        
+        self.sum_dice_liver = 0
+        self.sum_precision_liver = 0
+        self.sum_recall_liver = 0
+        
+        self.sum_dice_lesion = 0
+        self.sum_precision_lesion = 0
+        self.sum_recall_lesion = 0
+        
         self.count = 0
 
-    def update(self, val, n=1):
-        self.val = val
-        self.sum += val * n
+    def update(self,label_preds, label_trues):
+        
+        self.val_dice_liver, self.val_precision_liver, self.val_recall_liver, self.val_dice_lesion,
+        self.val_precision_lesion, self.val_recall_lesion, n = self.eval_metrics(label_preds, label_trues)
+
+        self.sum_dice_liver += self.val_dice_liver * n
+        self.sum_precision_liver += self.val_precision_liver * n
+        self.sum_recall_liver += self.val_recall_liver * n
+        
+        self.sum_dice_lesion += self.val_dice_lesion * n
+        self.sum_precision_lesion += self.val_precision_lesion * n
+        self.sum_recall_lesion += self.val_recall_lesion * n
+        
         self.count += n
-        self.avg = self.sum / self.count
+        
+        self.avg_dice_liver = self.sum_dice_liver / self.count
+        self.avg_precision_liver = self.sum_precision_liver / self.count
+        self.avg_recall_liver = self.sum_recall_liver / self.count
+        
+        self.avg_dice_lesion = self.sum_dice_lesion / self.count
+        self.avg_precision_lesion = self.sum_precision_lesion / self.count
+        self.avg_recall_lesion = self.sum_recall_lesion / self.count
+        
         
     def eval_metrics(self, label_preds, label_trues):
         """Inputs:
@@ -97,6 +137,8 @@ class evalMetrics(object):
         """
         np_preds = label_preds.cpu().numpy()
         np_trues = label_trues.cpu().numpy()
+        
+        batch_size = np_trues.shape[0]
         
         pred_mask = np.zeros_like(np_preds, dtype=int)
         pred_mask[np_preds.max(axis=1,keepdims=1) == np_preds] = 1
@@ -125,4 +167,4 @@ class evalMetrics(object):
         recall_liver = np.average((tp_liver + 1)/(tp_liver + 1 + fp_liver))
         recall_lesion = np.average((tp_lesion + 1)/(tp_lesion + 1 + fn_lesion))
         
-        return np.array([[dice_liver, precision_liver, recall_liver],[dice_lesion, precision_lesion, recall_lesion]])
+        return np.array([dice_liver, precision_liver, recall_liver, dice_lesion, precision_lesion, recall_lesion, batch_size])
