@@ -91,4 +91,11 @@ class evalMetrics(object):
     def dice(self, label_preds, label_trues):
         np_preds = label_preds.cpu().numpy()
         np_trues = label_trues.cpu().numpy()
+        
         pred_mask = np_preds.max(axis=1,keepdims=1) == np_preds
+        
+        liver_mask = np.zeros_like(np_trues)
+        lesion_mask = np.zeros_like(np_trues)
+        
+        liver_mask[pred_mask[:, 1, :, :]] = 1
+        lesion_mask[pred_mask[:, 2, :, :]] = 1
