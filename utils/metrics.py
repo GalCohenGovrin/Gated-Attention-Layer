@@ -88,14 +88,27 @@ class evalMetrics(object):
         self.count += n
         self.avg = self.sum / self.count
         
-    def dice(self, label_preds, label_trues):
+    def eval_metrics(self, label_preds, label_trues):
+        """Inputs:
+            - label_preds: BxCxHxW
+            - label_trues: BxHxW
+        
+        
+        """
         np_preds = label_preds.cpu().numpy()
         np_trues = label_trues.cpu().numpy()
         
-        pred_mask = np_preds.max(axis=1,keepdims=1) == np_preds
+        pred_mask = np.zeros_like(np_preds, dtype=int)
+        pred_mask[np_preds.max(axis=1,keepdims=1) == np_preds] = 1
+
+        true_liver = np.where(np_trues == 1, 1, 0)
+        true_lesion = np.where(np_trues == 2, 1, 0)
+
+        pred_liver = pred_mask[:, 1, :, :]
+        pred_lesion = pred_mask[:, 2, :, :]
+
+        tp_liver = np.sum(pred_liver*true_liver, axis=(1,2))
+        tp_lesion = np.sum(pred_lesion*true_lesion, axis=(1,2))
         
-        pred_liver = np.zeros_like(np_trues)
-        pred_lesion = np.zeros_like(np_trues)
-        
-        pred_liver[pred_mask[:, 1, :, :]] = 1
-        pred_lesion[pred_mask[:, 2, :, :]] = 1
+        fp_liver = np.sum(pred_liver, axis=(1,2)) - tp_liver
+        fp_lesion = np.sum(pred_lesion, axis=(1,2)) - tp_lesion
