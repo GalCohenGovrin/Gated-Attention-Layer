@@ -112,3 +112,17 @@ class evalMetrics(object):
         
         fp_liver = np.sum(pred_liver, axis=(1,2)) - tp_liver
         fp_lesion = np.sum(pred_lesion, axis=(1,2)) - tp_lesion
+        
+        fn_liver = np.sum(true_liver, axis=(1,2)) - tp_liver
+        fn_lesion = np.sum(true_lesion, axis=(1,2)) - tp_lesion
+        
+        dice_liver = np.average((2*tp_liver + 1)/(2*tp_liver + 1 + fp_liver + fn_liver))
+        dice_lesion = np.average((2*tp_lesion + 1)/(2*tp_lesion + 1 + fp_lesion + fn_lesion))
+        
+        precision_liver = np.average((tp_liver + 1)/(tp_liver + 1 + fp_liver))
+        precision_lesion = np.average((tp_lesion + 1)/(tp_lesion + 1 + fp_lesion))
+        
+        recall_liver = np.average((tp_liver + 1)/(tp_liver + 1 + fp_liver))
+        recall_lesion = np.average((tp_lesion + 1)/(tp_lesion + 1 + fn_lesion))
+        
+        return np.array([[dice_liver, precision_liver, recall_liver],[dice_lesion, precision_lesion, recall_lesion]])
