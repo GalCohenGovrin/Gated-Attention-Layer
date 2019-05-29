@@ -88,7 +88,7 @@ class evalMetrics(object):
         self.count += n
         self.avg = self.sum / self.count
         
-    def dice(self, label_trues, label_preds):
+    def dice(self, label_preds, label_trues):
         np_preds = label_preds.cpu().numpy()
         np_trues = label_trues.cpu().numpy()
-        b, c, h, w = np_preds.shape
+        pred_mask = np_preds.max(axis=1,keepdims=1) == np_preds
