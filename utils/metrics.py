@@ -106,8 +106,7 @@ class evalMetrics(object):
 
     def update(self,label_preds, label_trues):
         
-        self.val_dice_liver, self.val_precision_liver, self.val_recall_liver, self.val_dice_lesion,
-        self.val_precision_lesion, self.val_recall_lesion, n = self.eval_metrics(label_preds, label_trues)
+        self.val_dice_liver, self.val_precision_liver, self.val_recall_liver, self.val_dice_lesion, self.val_precision_lesion, self.val_recall_lesion, n = self.eval_metrics(label_preds, label_trues)
 
         self.sum_dice_liver += self.val_dice_liver * n
         self.sum_precision_liver += self.val_precision_liver * n
