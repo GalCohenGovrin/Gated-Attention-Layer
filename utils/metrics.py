@@ -94,8 +94,8 @@ class evalMetrics(object):
         
         pred_mask = np_preds.max(axis=1,keepdims=1) == np_preds
         
-        liver_mask = np.zeros_like(np_trues)
-        lesion_mask = np.zeros_like(np_trues)
+        pred_liver = np.zeros_like(np_trues)
+        pred_lesion = np.zeros_like(np_trues)
         
-        liver_mask[pred_mask[:, 1, :, :]] = 1
-        lesion_mask[pred_mask[:, 2, :, :]] = 1
+        pred_liver[pred_mask[:, 1, :, :]] = 1
+        pred_lesion[pred_mask[:, 2, :, :]] = 1
