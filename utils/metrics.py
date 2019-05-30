@@ -99,7 +99,7 @@ class evalMetrics(object):
         precision_liver = np.average((tp_liver + 1)/(tp_liver + 1 + fp_liver))
         precision_lesion = np.average((tp_lesion + 1)/(tp_lesion + 1 + fp_lesion))
         
-        recall_liver = np.average((tp_liver + 1)/(tp_liver + 1 + fp_liver))
+        recall_liver = np.average((tp_liver + 1)/(tp_liver + 1 + fn_liver))
         recall_lesion = np.average((tp_lesion + 1)/(tp_lesion + 1 + fn_lesion))
         
         return np.array([dice_liver, precision_liver, recall_liver, dice_lesion, precision_lesion, recall_lesion, batch_size])
