@@ -34,13 +34,14 @@ class CTLoader(data.Dataset):
         self.n_classes = 3
         self.files = collections.defaultdict(list)
         self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
-
-        if not self.test_mode:
-            for split in ["train", "val"]:
+        
+        for split in ["train", "val"]:
                 path = pjoin(self.root, split + ".txt")
                 file_list = tuple(open(path, "r"))
                 file_list = [id_.rstrip() for id_ in file_list]
                 self.files[split] = file_list
+
+        if not self.test_mode:
             self.setup_annotations()
 
         self.tf = transforms.Compose(
