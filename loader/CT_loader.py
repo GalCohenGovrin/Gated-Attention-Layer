@@ -21,7 +21,7 @@ class CTLoader(data.Dataset):
         self,
         root = '/content/Data/',
         split="train",
-        is_transform=False,
+        is_transform=True,
         img_size=512,
         augmentations=None,
         test_mode=False,
@@ -32,7 +32,6 @@ class CTLoader(data.Dataset):
         self.augmentations = augmentations
         self.test_mode = test_mode
         self.n_classes = 3
-        #self.mean = np.array([104.00699, 116.66877, 122.67892])
         self.files = collections.defaultdict(list)
         self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
 
@@ -46,8 +45,8 @@ class CTLoader(data.Dataset):
 
         self.tf = transforms.Compose(
             [
-                transforms.ToTensor(),
-                #transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+                #transforms.ToTensor(),
+                transforms.Normalize([0.192], [0.263]),
             ]
         )
 
@@ -72,13 +71,13 @@ class CTLoader(data.Dataset):
         return im, lbl
 
     def transform(self, img, lbl):
-        if self.img_size == ("same", "same"):
-            pass
-        else:
-            img = img.resize((self.img_size[0], self.img_size[1]))  # uint8 with RGB mode
-            lbl = lbl.resize((self.img_size[0], self.img_size[1]))
+        #if self.img_size == ("same", "same"):
+         #   pass
+        #else:
+         #   img = img.resize((self.img_size[0], self.img_size[1]))  # uint8 with RGB mode
+        #    lbl = lbl.resize((self.img_size[0], self.img_size[1]))
         img = self.tf(img)
-        lbl = torch.from_numpy(np.array(lbl)).long()
+        #lbl = torch.from_numpy(np.array(lbl)).long()
         
         return img, lbl
 
