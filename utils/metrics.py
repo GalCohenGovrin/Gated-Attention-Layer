@@ -112,6 +112,77 @@ class evalAvgMetrics(object):
         self.avg_precision_lesion,
         self.avg_recall_lesion])
     
+    
+    
+class evalMetrics(object):
+    """Computes and stores the evaluation metrics"""
+
+    def __init__(self):
+        self.reset()
+        
+    def reset(self):
+        self.tp_liver = 0
+        self.fp_liver = 0
+        self.fn_liver = 0
+        
+        self.tp_lesion = 0
+        self.fp_lesion = 0
+        self.fn_lesion = 0
+        
+
+        
+    def update(self, label_preds, label_trues):
+        """Inputs:
+            - label_preds: BxCxHxW
+            - label_trues: BxHxW
+        
+        
+        """
+        np_preds = label_preds.cpu().detach().numpy()
+        np_trues = label_trues.cpu().detach().numpy()
+        
+        batch_size = np_trues.shape[0]
+        
+        pred_mask = np.zeros_like(np_preds, dtype=int)
+        pred_mask[np_preds.max(axis=1,keepdims=1) == np_preds] = 1
+
+        true_liver = np.where(np_trues == 1, 1, 0)
+        true_lesion = np.where(np_trues == 2, 1, 0)
+
+        pred_liver = pred_mask[:, 1, :, :]
+        pred_lesion = pred_mask[:, 2, :, :]
+        
+        cur_tp_liver = np.sum(pred_liver*true_liver)
+        cur_tp_lesion = np.sum(pred_lesion*true_lesion)
+
+        self.tp_liver += cur_tp_liver
+        self.tp_lesion += cur_tp_lesion
+        
+        self.fp_liver += np.sum(pred_liver) - cur_tp_liver
+        self.fp_lesion += np.sum(pred_lesion) - cur_tp_lesion
+        
+        self.fn_liver += np.sum(true_liver) - cur_tp_liver
+        self.fn_lesion += np.sum(true_lesion) - cur_tp_lesion
+    
+    def get_scores(self):
+        
+        dice_liver = (2*self.tp_liver)/(2*self.tp_liver + self.fp_liver + self.fn_liver)
+        precision_liver = (self.tp_liver)/(self.tp_liver + self.fp_liver)
+        recall_liver = (self.tp_liver)/(self.tp_liver + self.fn_liver)
+        
+        dice_lesion = (2*self.tp_lesion)/(2*self.tp_lesion + self.fp_lesion + self.fn_lesion)
+        precision_lesion = (self.tp_lesion)/(self.tp_lesion + self.fp_lesion)
+        recall_lesion = (self.tp_lesion)/(self.tp_lesion + self.fn_lesion)
+        
+        return np.array([dice_liver,
+        precision_liver,
+        recall_liver,
+        dice_lesion,
+        precision_lesion,
+        recall_lesion])
+    
+    
+    
 class runningScore(object):
     def __init__(self, n_classes):
         self.n_classes = n_classes
