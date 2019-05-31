@@ -6,7 +6,7 @@ import torch
 
 #TODO: use "torch.unique(input, sorted=True, return_inverse=False, return_counts=False, dim=None)"
 #       instead of numpy
-class evalMetrics(object):
+class evalAvgMetrics(object):
     """Computes and stores the evaluation metrics"""
 
     def __init__(self):
