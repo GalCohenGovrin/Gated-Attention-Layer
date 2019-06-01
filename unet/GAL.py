@@ -3,7 +3,7 @@
 
 import torch.nn.functional as F
 
-from .unet_parts import *
+from .gal_parts import *
 
 class GUNet(nn.Module):
     def __init__(self, n_channels=1, n_classes=3):
