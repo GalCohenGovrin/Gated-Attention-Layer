@@ -121,6 +121,10 @@ class evalMetrics(object):
         self.reset()
         
     def reset(self):
+        self.tp_bg = 0
+        self.fp_bg = 0
+        self.fn_bg = 0
+        
         self.tp_liver = 0
         self.fp_liver = 0
         self.fn_liver = 0
@@ -146,25 +150,35 @@ class evalMetrics(object):
         pred_mask = np.zeros_like(np_preds, dtype=int)
         pred_mask[np_preds.max(axis=1,keepdims=1) == np_preds] = 1
 
+        true_bg = np.where(np_trues == 0, 1, 0)
         true_liver = np.where(np_trues == 1, 1, 0)
         true_lesion = np.where(np_trues == 2, 1, 0)
 
+        pred_bg = pred_mask[:, 0, :, :]
         pred_liver = pred_mask[:, 1, :, :]
         pred_lesion = pred_mask[:, 2, :, :]
         
+        cur_tp_bg = np.sum(pred_bg*true_bg)
         cur_tp_liver = np.sum(pred_liver*true_liver)
         cur_tp_lesion = np.sum(pred_lesion*true_lesion)
-
+        
+        self.tp_bg += cur_tp_bg
         self.tp_liver += cur_tp_liver
         self.tp_lesion += cur_tp_lesion
         
+        self.fp_bg += np.sum(pred_bg) - cur_tp_bg
         self.fp_liver += np.sum(pred_liver) - cur_tp_liver
         self.fp_lesion += np.sum(pred_lesion) - cur_tp_lesion
         
+        self.fn_bg += np.sum(true_bg) - cur_tp_bg
         self.fn_liver += np.sum(true_liver) - cur_tp_liver
         self.fn_lesion += np.sum(true_lesion) - cur_tp_lesion
     
     def get_scores(self):
+        
+        dice_bg = (2*self.tp_bg)/(2*self.tp_bg + self.fp_bg + self.fn_bg)
+        precision_bg = (self.tp_bg)/(self.tp_bg + self.fp_bg)
+        recall_bg = (self.tp_bg)/(self.tp_bg + self.fn_bg)
         
         dice_liver = (2*self.tp_liver)/(2*self.tp_liver + self.fp_liver + self.fn_liver)
         precision_liver = (self.tp_liver)/(self.tp_liver + self.fp_liver)
@@ -174,7 +188,7 @@ class evalMetrics(object):
         precision_lesion = (self.tp_lesion)/(self.tp_lesion + self.fp_lesion)
         recall_lesion = (self.tp_lesion)/(self.tp_lesion + self.fn_lesion)
         
-        return np.array([dice_liver,
+        return np.array([dice_bg, precision_bg, recall_bg, dice_liver,
         precision_liver,
         recall_liver,
         dice_lesion,
