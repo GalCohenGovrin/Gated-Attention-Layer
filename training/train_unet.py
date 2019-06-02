@@ -3,8 +3,8 @@ import torch.nn.functional as F
 from loss.loss import cross_entropy2d
 
 def trainUnet(model, tLoader, vLoader, optimizer, scheduler, scores, weights, nm_epochs):
-  epoch = 
-  while epoch <=nm_epochs:
+  epoch = 0
+  while epoch <= nm_epochs:
     scores.reset()
     i = 0
     total_loss = 0
