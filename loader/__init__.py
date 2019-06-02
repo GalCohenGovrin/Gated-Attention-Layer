@@ -1,5 +1,5 @@
 from loader.CT_loader import CTLoader
-
+from loader.GAL_loader import GALoader
 
 def get_loader(name):
     """get_loader
