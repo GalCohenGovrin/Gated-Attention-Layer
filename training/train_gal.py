@@ -1,30 +1,36 @@
 import torch
 import torch.nn.functional as F
+import torch.nn as nn
 from loss.loss import cross_entropy2d
 
-def trainUnet(model, tLoader, vLoader, optimizer, scheduler, scores, weights, nm_epochs):
+def trainGUnet(model, tLoader, vLoader, optimizer, scheduler, scores, weights, nm_epochs):
   epoch = 0
-  while epoch <=nm_epochs:
+  mask_loss = nn.BCEWithLogitsLoss()
+  while epoch <= nm_epochs:
     scores.reset()
     i = 0
     total_loss = 0
-    for (images, labels) in tLoader:
+    for (images, all_seg, mask_seg) in tLoader:
             
             i += 1
             
             model.train()
             images = images.float().cuda()
-            labels = labels.cuda()
+            all_seg = all_seg.cuda()
+            mask_seg = mask_seg.cuda()
             optimizer.zero_grad()
-            outputs = model(images)
+            seg_out, mask_out = model(images)
 
-            loss = cross_entropy2d(input=outputs, target=labels, weight=weights)
+            ce_loss = cross_entropy2d(input=seg_out, target=all_seg, weight=weights)
+            bce_loss = mask_loss(mask_out, mask_seg)
+            
+            loss = ce_loss + bce_loss
 
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
-            labels = labels.squeeze()
-            scores.update(outputs, labels)
+            all_seg = all_seg.squeeze()
+            scores.update(seg_out, all_seg)
             
             
   metrics_results = scores.get_scores()
@@ -44,20 +50,21 @@ def trainUnet(model, tLoader, vLoader, optimizer, scheduler, scores, weights, nm
   i = 0
   total_loss = 0
   with torch.no_grad():
-    for (images, labels) in vLoader:
+    for (images, all_seg, mask_seg) in vLoader:
       i += 1
 
       model.eval()
       images = images.float().cuda()
-      labels = labels.cuda()
+      all_seg = all_seg.cuda()
+      mask_seg = mask_seg.cuda()
 
-      outputs = model(images)
+      seg_out, mask_out = model(images)
 
-      loss = cross_entropy2d(input=outputs, target=labels, weight=balance_weight)
+      loss = cross_entropy2d(input=seg_out, target=all_seg, weight=balance_weight)
 
       total_loss += loss.item()
-      labels = labels.squeeze()
-      scores.update(outputs, labels)
+      all_seg = all_seg.squeeze()
+      scores.update(seg_out, all_seg)
       
   metrics_results = scores.get_scores()
   print('----------VAL-------------')
