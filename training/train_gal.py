@@ -60,7 +60,10 @@ def trainGUnet(model, tLoader, vLoader, optimizer, scheduler, scores, weights, n
 
       seg_out, mask_out = model(images)
 
-      loss = cross_entropy2d(input=seg_out, target=all_seg, weight=balance_weight)
+      ce_loss = cross_entropy2d(input=seg_out, target=all_seg, weight=weights)
+      bce_loss = mask_loss(mask_out, mask_seg)
+
+      loss = ce_loss + bce_loss
 
       total_loss += loss.item()
       all_seg = all_seg.squeeze()
