@@ -121,7 +121,7 @@ class final_up(nn.Module):
         atn_mask = self.gAttention(sigmo_mask)
         all_seg = all_seg1 * atn_mask
         
-        return all_seg, mask_seg
+        return all_seg, mask_seg, all_seg1
 
 class outconv(nn.Module):
     def __init__(self, in_ch, out_ch):
