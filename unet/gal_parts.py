@@ -5,23 +5,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class max_drop(nn.Module):
-    '''(conv => BN => ReLU) * 2'''
-    def __init__(self, in_ch, out_ch):
-        super(max_drop, self).__init__()
-        self.conv = nn.Sequential(
-            nn.Conv2d(in_ch, out_ch, 3, padding=1),
-            nn.BatchNorm2d(out_ch),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(out_ch, out_ch, 3, padding=1),
-            nn.BatchNorm2d(out_ch),
-            nn.ReLU(inplace=True)
-        )
-
-    def forward(self, x):
-        x = self.conv(x)
-        return x
-
 class double_conv(nn.Module):
     '''(conv => BN => ReLU) * 2'''
     def __init__(self, in_ch, out_ch):
@@ -55,7 +38,7 @@ class down(nn.Module):
         super(down, self).__init__()
         self.mpconv = nn.Sequential(
             nn.MaxPool2d(2),
-            nn.Dropout2d(p=0.2, inplace=True),
+#             nn.Dropout2d(p=0.2, inplace=True),
             double_conv(in_ch, out_ch)
         )
 
@@ -96,7 +79,7 @@ class up(nn.Module):
         return x
     
 class final_up(nn.Module):
-    def __init__(self, in_ch, out_ch, bilinear=True):
+    def __init__(self, in_ch, out_ch, nm_cls=3, bilinear=True):
         super(final_up, self).__init__()
 
         #  would be a nice idea if the upsampling could be learned too,
@@ -106,7 +89,14 @@ class final_up(nn.Module):
         else:
             self.up = nn.ConvTranspose2d(in_ch//2, in_ch//2, 2, stride=2)
 
-
+        self.conv = double_conv(in_ch, out_ch)
+        self.cls_conv = outconv(out_ch, nm_cls)
+        self.mask_conv = outconv(out_ch, 1)
+        
+#         self.relu = nn.ReLU()
+        self.sigmoid = nn.Sigmoid()
+        self.gAttention = outconv(1, nm_cls)
+        
     def forward(self, x1, x2):
         x1 = self.up(x1)
         
@@ -122,8 +112,16 @@ class final_up(nn.Module):
         # https://github.com/xiaopeng-liao/Pytorch-UNet/commit/8ebac70e633bac59fc22bb5195e513d5832fb3bd
 
         x = torch.cat([x2, x1], dim=1)
+        x = self.conv(x)
         
-        return x
+        all_seg1 = self.cls_conv(x)
+        mask_seg = self.mask_conv(x)
+        
+        sigmo_mask = self.sigmoid(F.relu(mask_seg))-0.5
+        atn_mask = self.gAttention(sigmo_mask)
+        all_seg = all_seg1 * atn_mask
+        
+        return all_seg, mask_seg
 
 class outconv(nn.Module):
     def __init__(self, in_ch, out_ch):
@@ -131,5 +129,24 @@ class outconv(nn.Module):
         self.conv = nn.Conv2d(in_ch, out_ch, 1)
 
     def forward(self, x):
-        x = self.conv(x)
-        return x
+        y = self.conv(x)
+        return y
+    
+    
+
+# class max_drop(nn.Module):
+#     '''(conv => BN => ReLU) * 2'''
+#     def __init__(self, in_ch, out_ch):
+#         super(max_drop, self).__init__()
+#         self.conv = nn.Sequential(
+#             nn.Conv2d(in_ch, out_ch, 3, padding=1),
+#             nn.BatchNorm2d(out_ch),
+#             nn.ReLU(inplace=True),
+#             nn.Conv2d(out_ch, out_ch, 3, padding=1),
+#             nn.BatchNorm2d(out_ch),
+#             nn.ReLU(inplace=True)
+#         )
+
+#     def forward(self, x):
+#         x = self.conv(x)
+#         return x
