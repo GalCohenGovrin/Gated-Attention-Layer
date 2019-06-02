@@ -16,8 +16,8 @@ class GUNet(nn.Module):
         self.up1 = up(1024, 256)
         self.up2 = up(512, 128)
         self.up3 = up(256, 64)
-        self.up4 = up(128, 64)
-        self.outc = outconv(64, n_classes)
+        self.up4 = final_up(128, 64, nm_cls=n_classes)
+#         self.outc = outconv(64, n_classes)
 
     def forward(self, x):
         x1 = self.inc(x)
@@ -28,6 +28,6 @@ class GUNet(nn.Module):
         x = self.up1(x5, x4)
         x = self.up2(x, x3)
         x = self.up3(x, x2)
-        x = self.up4(x, x1)
-        x = self.outc(x)
-        return x
+        all_seg, mask_seg = self.up4(x, x1)
+        
+        return all_seg, mask_seg
