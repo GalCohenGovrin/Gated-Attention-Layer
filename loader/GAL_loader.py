@@ -69,7 +69,7 @@ class GALoader(data.Dataset):
         im = torch.unsqueeze(im, 0).float()
         all_seg = torch.from_numpy(np.array(all_seg)).long()
         all_seg = torch.unsqueeze(all_seg, 0)
-        mask_seg = torch.from_numpy(np.array(mask_seg)).long()
+        mask_seg = torch.from_numpy(np.array(mask_seg)).float()
         mask_seg = torch.unsqueeze(mask_seg, 0)
         
         if self.augmentations is not None:
