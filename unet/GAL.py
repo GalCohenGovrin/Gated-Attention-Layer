@@ -28,6 +28,6 @@ class GUNet(nn.Module):
         x = self.up1(x5, x4)
         x = self.up2(x, x3)
         x = self.up3(x, x2)
-        all_seg, mask_seg = self.up4(x, x1)
+        all_seg, mask_seg, all_seg_prev = self.up4(x, x1)
         
-        return all_seg, mask_seg
+        return all_seg, mask_seg, all_seg_prev
