@@ -91,11 +91,11 @@ class final_up(nn.Module):
 
         self.conv = double_conv(in_ch, out_ch)
         self.cls_conv = outconv(out_ch, nm_cls)
-        self.mask_conv = outconv(out_ch, 1)
+        self.mask_conv = outconv(out_ch, 2)
         
 #         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
-        self.gAttention = outconv(1, nm_cls)
+        self.gAttention = outconv(2, nm_cls)
         
     def forward(self, x1, x2):
         x1 = self.up(x1)
