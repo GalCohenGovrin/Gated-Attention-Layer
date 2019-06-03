@@ -433,25 +433,25 @@ class EnhancedCompose(object):
         return img
 
 
-if __name__ == '__main__':
-    from torchvision.transforms import Lambda
-    input_channel = 3
-    target_channel = 3
+# if __name__ == '__main__':
+#     from torchvision.transforms import Lambda
+#     input_channel = 3
+#     target_channel = 3
 
-    # define a transform pipeline
-    transform = EnhancedCompose([
-        Merge(),
-        RandomCropNumpy(size=(512, 512)),
-        RandomRotate(),
-        Split([0, input_channel], [input_channel, input_channel+target_channel]),
-        [CenterCropNumpy(size=(256, 256)), CenterCropNumpy(size=(256, 256))],
-        [NormalizeNumpy(), MaxScaleNumpy(0, 1.0)],
-        # for non-pytorch usage, remove to_tensor conversion
-        [Lambda(to_tensor), Lambda(to_tensor)]
-    ])
-    # read input data for test
-    image_in = np.array(Image.open('input.jpg'))
-    image_target = np.array(Image.open('target.jpg'))
+#     # define a transform pipeline
+#     transform = EnhancedCompose([
+#         Merge(),
+#         RandomCropNumpy(size=(512, 512)),
+#         RandomRotate(),
+#         Split([0, input_channel], [input_channel, input_channel+target_channel]),
+#         [CenterCropNumpy(size=(256, 256)), CenterCropNumpy(size=(256, 256))],
+#         [NormalizeNumpy(), MaxScaleNumpy(0, 1.0)],
+#         # for non-pytorch usage, remove to_tensor conversion
+#         [Lambda(to_tensor), Lambda(to_tensor)]
+#     ])
+#     # read input data for test
+#     image_in = np.array(Image.open('input.jpg'))
+#     image_target = np.array(Image.open('target.jpg'))
     
-    # apply the transform
-    x, y = transform([image_in, image_target])
+#     # apply the transform
+#     x, y = transform([image_in, image_target])
