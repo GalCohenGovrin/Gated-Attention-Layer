@@ -114,7 +114,7 @@ class evalAvgMetrics(object):
     
     
     
-class evalMetrics(object):
+class SegMetrics(object):
     """Computes and stores the evaluation metrics"""
 
     def __init__(self):
@@ -201,6 +201,76 @@ class evalMetrics(object):
 #         dice_lesion,
 #         precision_lesion,
 #         recall_lesion])
+
+class MaskMetrics(object):
+    """Computes and stores the evaluation metrics"""
+
+    def __init__(self):
+        self.reset()
+        
+    def reset(self):
+        self.tp_bg = 0
+        self.fp_bg = 0
+        self.fn_bg = 0
+        
+        self.tp_liver = 0
+        self.fp_liver = 0
+        self.fn_liver = 0
+        
+#         self.tp_lesion = 0
+#         self.fp_lesion = 0
+#         self.fn_lesion = 0
+        
+
+        
+    def update(self, label_preds, label_trues):
+        """Inputs:
+            - label_preds: BxCxHxW
+            - label_trues: BxHxW
+        
+        
+        """
+        np_preds = label_preds.cpu().detach().numpy()
+        np_trues = label_trues.cpu().detach().numpy()
+        
+        batch_size = np_trues.shape[0]
+        
+        pred_mask = np.zeros_like(np_preds, dtype=int)
+        pred_mask[np_preds.max(axis=1,keepdims=1) == np_preds] = 1
+
+        true_bg = np.where(np_trues == 0, 1, 0)
+        true_liver = np.where(np_trues == 1, 1, 0)
+
+        pred_bg = pred_mask[:, 0, :, :]
+        pred_liver = pred_mask[:, 1, :, :]
+        
+        cur_tp_bg = np.sum(pred_bg*true_bg)
+        cur_tp_liver = np.sum(pred_liver*true_liver)
+        
+        self.tp_bg += cur_tp_bg
+        self.tp_liver += cur_tp_liver
+        
+        self.fp_bg += np.sum(pred_bg) - cur_tp_bg
+        self.fp_liver += np.sum(pred_liver) - cur_tp_liver
+        
+        self.fn_bg += np.sum(true_bg) - cur_tp_bg
+        self.fn_liver += np.sum(true_liver) - cur_tp_liver
+    
+    def get_scores(self):
+        
+        dice_bg = (2*self.tp_bg)/(2*self.tp_bg + self.fp_bg + self.fn_bg)
+        precision_bg = (self.tp_bg)/(self.tp_bg + self.fp_bg)
+        recall_bg = (self.tp_bg)/(self.tp_bg + self.fn_bg)
+        
+        dice_liver = (2*self.tp_liver)/(2*self.tp_liver + self.fp_liver + self.fn_liver)
+        precision_liver = (self.tp_liver)/(self.tp_liver + self.fp_liver)
+        recall_liver = (self.tp_liver)/(self.tp_liver + self.fn_liver)
+        
+        
+        
+        return np.array([dice_bg, precision_bg, recall_bg, dice_liver,
+        precision_liver,
+        recall_liver])
     
     
     
