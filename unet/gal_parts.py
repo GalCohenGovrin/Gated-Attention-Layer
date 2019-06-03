@@ -118,7 +118,7 @@ class final_up(nn.Module):
         mask_seg = self.mask_conv(x)
         
         sigmo_mask = F.relu(self.sigmoid(F.relu(mask_seg))-0.5)
-        atn_mask = self.gAttention(sigmo_mask)
+        atn_mask = F.relu(self.gAttention(sigmo_mask))
         all_seg = all_seg1 * atn_mask
         
         return all_seg, mask_seg, all_seg1
