@@ -13,6 +13,8 @@ from PIL import Image
 from tqdm import tqdm
 from torch.utils import data
 from torchvision import transforms
+from utils.imageUtils import *
+from torchvision.transforms import Lambda
 
 
 class GALoader(data.Dataset):
@@ -43,13 +45,15 @@ class GALoader(data.Dataset):
 
         if not self.test_mode:
             self.setup_annotations()
+            
+        else:
 
-        self.tf = transforms.Compose(
-            [
-                #transforms.ToTensor(),
-                transforms.Normalize([0.192], [0.263]),
-            ]
-        )
+            self.tf = transforms.Compose(
+                [
+                    #transforms.ToTensor(),
+                    transforms.Normalize([0.192], [0.263]),
+                ]
+            )
 
     def __len__(self):
         return len(self.files[self.split])
