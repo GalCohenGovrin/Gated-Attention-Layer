@@ -4,3 +4,4 @@
 #from .data_vis import *
 from .metrics import *
 from .data_statistics import *
+from .imageUtils import *
