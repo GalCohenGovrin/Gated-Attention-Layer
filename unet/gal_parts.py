@@ -15,8 +15,8 @@ class double_conv(nn.Module):
             nn.ReLU(inplace=True),
             nn.Conv2d(out_ch, out_ch, 3, padding=1),
             nn.BatchNorm2d(out_ch),
-            nn.ReLU(inplace=True),
-            nn.Dropout2d(p=0.2)
+            nn.ReLU(inplace=True)
+#             nn.Dropout2d(p=0.2)
         )
 
     def forward(self, x):
@@ -97,6 +97,7 @@ class final_up(nn.Module):
 #         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
         self.gAttention = outconv(2, nm_cls)
+        self.test_conv = outconv(nm_cls, nm_cls)
         
     def forward(self, x1, x2):
         x1 = self.up(x1)
@@ -120,6 +121,7 @@ class final_up(nn.Module):
         
         sigmo_mask = F.relu(self.sigmoid(F.relu(mask_seg))-0.5)
         atn_mask = F.relu(self.gAttention(sigmo_mask))
+        atn_mask = F.relu(self.test_conv(atn_mask))
         all_seg = all_seg1 * atn_mask
         
         return all_seg, mask_seg, all_seg1
