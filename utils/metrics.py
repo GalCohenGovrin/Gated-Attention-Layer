@@ -158,7 +158,7 @@ class SegMetrics(object):
         pred_liver = pred_mask[:, 1, :, :]
         pred_lesion = pred_mask[:, 2, :, :]
         
-        cur_tp_bg = np.sum(pred_bg*true_bg)
+#         cur_tp_bg = np.sum(pred_bg*true_bg)
         cur_tp_liver = np.sum(pred_liver*true_liver)
         cur_tp_lesion = np.sum(pred_lesion*true_lesion)
         
