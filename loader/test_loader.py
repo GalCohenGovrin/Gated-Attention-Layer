@@ -42,9 +42,9 @@ class GALoader(data.Dataset):
                 RandomRotate(),
                 ElasticTransform(),
                 Split([0, 1], [1, 2], [2,3]),
-                [NormalizeNumpyImage(), CreateSeg(), CreateMask()],
+                [NormalizeNumpyImage(), CreateSeg(), CreateMask()]
                 # for non-pytorch usage, remove to_tensor conversion
-                [Lambda(to_float_tensor), Lambda(to_long_tensor),Lambda(to_long_tensor)]
+#                 [Lambda(to_float_tensor), Lambda(to_long_tensor),Lambda(to_long_tensor)]
             ])
         else:
             self.augmentations = EnhancedCompose([
@@ -52,9 +52,9 @@ class GALoader(data.Dataset):
 #                 augmentations.RandomRotate(),
 #                 augmentations.ElasticTransform(),
                 Split([0, 1], [1, 2], [2,3]),
-                [NormalizeNumpyImage(), CreateSeg(), CreateMask()],
+                [NormalizeNumpyImage(), CreateSeg(), CreateMask()]
                 # for non-pytorch usage, remove to_tensor conversion
-                [Lambda(to_float_tensor), Lambda(to_long_tensor),Lambda(to_long_tensor)]
+#                 [Lambda(to_float_tensor), Lambda(to_long_tensor),Lambda(to_long_tensor)]
             ])
         
         for split in ["train", "val"]:
@@ -98,6 +98,9 @@ class GALoader(data.Dataset):
         
 #         if self.augmentations is not None:
         im, all_seg, mask_seg = self.augmentations([im, all_seg, mask_seg])
+        im = torch.from_numpy(im.transpose((2, 0, 1))).float()
+        all_seg = torch.from_numpy(all_seg.transpose((2, 0, 1))).long()
+        mask_seg = torch.from_numpy(mask_seg.transpose((2, 0, 1))).long()
 #             im, all_seg, mask_seg = self.augmentations(im, all_seg)
             
 #         if self.is_transform:
