@@ -71,12 +71,16 @@ def elastic_transform(image, alpha=500, sigma=30, spline_order=1, mode='nearest'
 def to_float_tensor(x):
     import torch
     x = x.transpose((2, 0, 1))
-    return torch.from_numpy(x).float()
+    x = torch.from_numpy(x).float()
+    x = torch.unsqueeze(x, 0)
+    return x
 
 def to_long_tensor(x):
     import torch
     x = x.transpose((2, 0, 1))
-    return torch.from_numpy(x).long()
+    x = torch.from_numpy(x).long()
+    x = torch.unsqueeze(x, 0)
+    return x
     
 
 class Merge(object):
@@ -460,8 +464,8 @@ class CreateSeg(object):
     def __init__(self):
         pass
     def __call__(self, all_seg):
-        all_seg[all_seg == 127] = 1
-        all_seg[all_seg == 255] = 2
+        all_seg[(0<all_seg) & (all_seg<191)] = 1
+        all_seg[all_seg >=191] = 2
         
 #         mask_seg = np.zeros_like(all_seg)
 #         mask_seg[all_seg == 1] = 1
@@ -476,8 +480,8 @@ class CreateMask(object):
     def __init__(self):
         pass
     def __call__(self, mask_seg):
-#         mask_seg[mask_seg == 127] = 1
-        mask_seg[mask_seg == 255] = 1
+        mask_seg[mask_seg < 127.5] = 0
+        mask_seg[mask_seg >= 127.5] = 1
         
 #         mask_seg = np.zeros_like(all_seg)
 #         mask_seg[all_seg == 1] = 1
