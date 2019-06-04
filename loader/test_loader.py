@@ -204,7 +204,7 @@ class GALoader(data.Dataset):
                         mask_seg[all_seg == 127] = 255
                         mask_seg[all_seg == 255] = 255
                         for i in range(self.data_mul):
-                            aug_img, aug_all_seg , aug_mask_seg = aug_transforms([im, all_seg, mask_seg])
+                            aug_img, aug_all_seg , aug_mask_seg = aug_transforms([img, all_seg, mask_seg])
                             fixed_img = Image.fromarray(aug_img)
                             fixed_all_seg = Image.fromarray(aug_all_seg)
                             fixed_mask_seg = Image.fromarray(aug_mask_seg)
