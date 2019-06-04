@@ -443,7 +443,7 @@ class NormalizeNumpyImage(object):
     """
 
     def __init__(self, mean=0.192, std=0.263):
-        self.mean_std = (range_min, range_max)
+        self.mean_std = (mean, std)
 
     def __call__(self, image):
         image = image / 255.
