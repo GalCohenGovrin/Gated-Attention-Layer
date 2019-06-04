@@ -122,7 +122,7 @@ class GALoader(data.Dataset):
 #             im, all_seg, mask_seg = self.augmentations(im, all_seg)
             
         if self.is_transform:
-            im, all_seg = self.transform(im, all_seg)#, mask_seg)
+            im, all_seg, mask_seg = self.transform(im, all_seg, mask_seg)
             
 #         return im1, all_seg1, mask_seg1
         return im, all_seg, mask_seg
