@@ -43,7 +43,7 @@ class GALoader(data.Dataset):
                 Merge(),
 #                 augmentations.RandomRotate(),
 #                 augmentations.ElasticTransform(),
-                Split([0, input_channel], [input_channel, input_channel+target_channel]),
+                Split([0, 1], [1, 2]),
                 [NormalizeNumpyImage(), augmentations.CreateSegAndMask()],
                 # for non-pytorch usage, remove to_tensor conversion
                 [Lambda(to_float_tensor), Lambda(to_long_tensor),Lambda(to_long_tensor)]
