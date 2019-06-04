@@ -73,7 +73,6 @@ def elastic_transform(image, alpha=1000, sigma=30, spline_order=1, mode='nearest
             image[:, :, i], indices, order=spline_order, mode=mode).reshape(shape)
     return result
 
-
 class Merge(object):
     """Merge a group of images
     """
@@ -93,6 +92,25 @@ class Merge(object):
             return np.concatenate(images, axis=self.axis)
         else:
             raise Exception("obj is not a sequence (list, tuple, etc)")
+# class Merge(object):
+#     """Merge a group of images
+#     """
+
+#     def __init__(self, axis=-1):
+#         self.axis = axis
+
+#     def __call__(self, images):
+#         if isinstance(images, collections.Sequence) or isinstance(images, np.ndarray):
+#             assert all([isinstance(i, np.ndarray)
+#                         for i in images]), 'only numpy array is supported'
+#             shapes = [list(i.shape) for i in images]
+#             for s in shapes:
+#                 s[self.axis] = None
+#             assert all([s == shapes[0] for s in shapes]
+#                        ), 'shapes must be the same except the merge axis'
+#             return np.concatenate(images, axis=self.axis)
+#         else:
+#             raise Exception("obj is not a sequence (list, tuple, etc)")
 
 
 class Split(object):
