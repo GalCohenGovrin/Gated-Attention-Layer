@@ -44,7 +44,7 @@ def poisson_downsampling(image, peak, random_state=np.random):
     return noisy_img.astype('float32')
 
 
-def elastic_transform(image, alpha=1000, sigma=30, spline_order=1, mode='nearest', random_state=np.random):
+def elastic_transform(image, alpha=1000, sigma=30, spline_order=3, mode='nearest', random_state=np.random):
     """Elastic deformation of image as described in [Simard2003]_.
     .. [Simard2003] Simard, Steinkraus and Platt, "Best Practices for
        Convolutional Neural Networks applied to Visual Document Analysis", in
