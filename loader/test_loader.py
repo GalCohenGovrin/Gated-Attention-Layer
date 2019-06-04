@@ -144,7 +144,7 @@ class GALoader(data.Dataset):
             Merge(),
 #             RandomRotate(),
             ElasticTransform(),
-            Split([0, 1], [1, 2], [2,3])
+            Split([0, 1], [1, 2], [2,3]),
             [None, CreateSeg(), CreateMask()]
             # for non-pytorch usage, remove to_tensor conversion
     #                 [Lambda(to_float_tensor), Lambda(to_long_tensor),Lambda(to_long_tensor)]
