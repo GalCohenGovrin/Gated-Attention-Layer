@@ -23,21 +23,29 @@ class GALoader(data.Dataset):
         self,
         root = '/content/Data/',
         split="train",
+        is_train=True,
         is_transform=True,
         img_size=512,
-        augmentations=None,
         test_mode=False,
     ):
         self.root = root
         self.split = split
         self.is_transform = is_transform
-        
+        self.is_train = is_train
         self.test_mode = test_mode
         self.n_classes = 3
         self.files = collections.defaultdict(list)
         self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
-        if augmentations is not None:
-            self.augmentations = augmentations
+        if self.is_train:
+            self.augmentations = EnhancedCompose([
+                Merge(),
+                RandomRotate(),
+                ElasticTransform(),
+                Split([0, 1], [1, 2], [2,3]),
+                [NormalizeNumpyImage(), CreateSeg(), CreateMask()],
+                # for non-pytorch usage, remove to_tensor conversion
+                [Lambda(to_float_tensor), Lambda(to_long_tensor),Lambda(to_long_tensor)]
+            ])
         else:
             self.augmentations = EnhancedCompose([
                 Merge(),
@@ -88,8 +96,8 @@ class GALoader(data.Dataset):
 #         mask_seg = torch.from_numpy(np.array(mask_seg)).long()
 #         mask_seg = torch.unsqueeze(mask_seg, 0)
         
-        if self.augmentations is not None:
-            im, all_seg, mask_seg = self.augmentations([im, all_seg, mask_seg])
+#         if self.augmentations is not None:
+        im, all_seg, mask_seg = self.augmentations([im, all_seg, mask_seg])
 #             im, all_seg, mask_seg = self.augmentations(im, all_seg)
             
 #         if self.is_transform:
