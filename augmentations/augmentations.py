@@ -6,6 +6,7 @@ from scipy.ndimage.interpolation import map_coordinates
 import collections
 from PIL import Image
 import numbers
+import torch
 
 __author__ = "Wei OUYANG"
 __license__ = "GPL"
@@ -68,19 +69,25 @@ def elastic_transform(image, alpha=500, sigma=30, spline_order=1, mode='nearest'
             image[:, :, i], indices, order=spline_order, mode=mode).reshape(shape)
     return result
 
-def to_float_tensor(x):
-    import torch
-    x = x.transpose((2, 0, 1))
-    x = torch.from_numpy(x).float()
-    x = torch.unsqueeze(x, 0)
-    return x
+class to_float_tensor(object):
+    def __init__(self):
+        pass
 
-def to_long_tensor(x):
-    import torch
-    x = x.transpose((2, 0, 1))
-    x = torch.from_numpy(x).long()
-    x = torch.unsqueeze(x, 0)
-    return x
+    def __call__(self, x):
+        x = x.transpose((2, 0, 1))
+        x = torch.from_numpy(x).float()
+        x = torch.unsqueeze(x, 0)
+        return x
+
+class to_long_tensor(object):
+    def __init__(self):
+        pass
+
+    def __call__(self, x):
+        x = x.transpose((2, 0, 1))
+        x = torch.from_numpy(x).long()
+        x = torch.unsqueeze(x, 0)
+        return x
     
 
 class Merge(object):
