@@ -133,10 +133,10 @@ class ElasticTransform(object):
     """Apply elastic transformation on a numpy.ndarray (H x W x C)
     """
 
-    def __init__(self): #, alpha, sigma):
+    def __init__(self): , alpha, sigma):
         pass
-#         self.alpha = alpha
-#         self.sigma = sigma
+        self.alpha = alpha
+        self.sigma = sigma
 
     def __call__(self, image):
 #         if isinstance(self.alpha, collections.Sequence):
