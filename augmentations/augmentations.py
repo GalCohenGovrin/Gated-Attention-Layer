@@ -20,12 +20,6 @@ def center_crop(x, center_crop_size):
     return x[:, centerw - halfw:centerw + halfw, centerh - halfh:centerh + halfh]
 
 
-def to_tensor(x):
-    import torch
-    x = x.transpose((2, 0, 1))
-    return torch.from_numpy(x).float()
-
-
 def random_num_generator(config, random_state=np.random):
     if config[0] == 'uniform':
         ret = random_state.uniform(config[1], config[2], 1)[0]
@@ -73,6 +67,17 @@ def elastic_transform(image, alpha=1000, sigma=30, spline_order=1, mode='nearest
             image[:, :, i], indices, order=spline_order, mode=mode).reshape(shape)
     return result
 
+def to_float_tensor(x):
+    import torch
+    x = x.transpose((2, 0, 1))
+    return torch.from_numpy(x).float()
+
+def to_long_tensor(x):
+    import torch
+    x = x.transpose((2, 0, 1))
+    return torch.from_numpy(x).long()
+    
+
 class Merge(object):
     """Merge a group of images
     """
@@ -92,25 +97,6 @@ class Merge(object):
             return np.concatenate(images, axis=self.axis)
         else:
             raise Exception("obj is not a sequence (list, tuple, etc)")
-# class Merge(object):
-#     """Merge a group of images
-#     """
-
-#     def __init__(self, axis=-1):
-#         self.axis = axis
-
-#     def __call__(self, images):
-#         if isinstance(images, collections.Sequence) or isinstance(images, np.ndarray):
-#             assert all([isinstance(i, np.ndarray)
-#                         for i in images]), 'only numpy array is supported'
-#             shapes = [list(i.shape) for i in images]
-#             for s in shapes:
-#                 s[self.axis] = None
-#             assert all([s == shapes[0] for s in shapes]
-#                        ), 'shapes must be the same except the merge axis'
-#             return np.concatenate(images, axis=self.axis)
-#         else:
-#             raise Exception("obj is not a sequence (list, tuple, etc)")
 
 
 class Split(object):
@@ -146,20 +132,20 @@ class ElasticTransform(object):
     """Apply elastic transformation on a numpy.ndarray (H x W x C)
     """
 
-    def __init__(self, alpha, sigma):
-        self.alpha = alpha
-        self.sigma = sigma
+    def __init__(self): #, alpha, sigma):
+#         self.alpha = alpha
+#         self.sigma = sigma
 
     def __call__(self, image):
-        if isinstance(self.alpha, collections.Sequence):
-            alpha = random_num_generator(self.alpha)
-        else:
-            alpha = self.alpha
-        if isinstance(self.sigma, collections.Sequence):
-            sigma = random_num_generator(self.sigma)
-        else:
-            sigma = self.sigma
-        return elastic_transform(image, alpha=alpha, sigma=sigma)
+#         if isinstance(self.alpha, collections.Sequence):
+#             alpha = random_num_generator(self.alpha)
+#         else:
+#             alpha = self.alpha
+#         if isinstance(self.sigma, collections.Sequence):
+#             sigma = random_num_generator(self.sigma)
+#         else:
+#             sigma = self.sigma
+        return elastic_transform(image)#, alpha=alpha, sigma=sigma)
 
 
 class PoissonSubsampling(object):
@@ -449,23 +435,52 @@ class EnhancedCompose(object):
             else:
                 raise Exception('unexpected type')
         return img
+    
+class NormalizeNumpyImage(object):
+    """Normalize the numpy array by mean and std of the train dataset statistics i.e.
+    channel = (channel - mean) / std
+    """
+
+    def __init__(self, mean=0.192, std=0.263):
+        self.mean_std = (range_min, range_max)
+
+    def __call__(self, image):
+        image = image / 255.
+        image = image - self.mean_std[0]
+        image = image / self.mean_std[1]
+        return image
+    
+class CreateSegAndMask(object):
+    """convert full segmentation mask classes to 0, 1, 2 and create attention mask
+    """
+
+    def __init__(self):
+
+    def __call__(self, all_seg):
+        all_seg[all_seg == 127] = 1
+        all_seg[all_seg == 255] = 2
+        
+        mask_seg = np.zeros_like(all_seg)
+        mask_seg[all_seg == 1] = 1
+        mask_seg[all_seg == 2] = 1
+        
+        return all_seg, mask_seg
 
 
 # if __name__ == '__main__':
 #     from torchvision.transforms import Lambda
-#     input_channel = 3
-#     target_channel = 3
+#     input_channel = 1
+#     target_channel = 1
 
 #     # define a transform pipeline
 #     transform = EnhancedCompose([
 #         Merge(),
-#         RandomCropNumpy(size=(512, 512)),
 #         RandomRotate(),
+#         ElasticTransform(),
 #         Split([0, input_channel], [input_channel, input_channel+target_channel]),
-#         [CenterCropNumpy(size=(256, 256)), CenterCropNumpy(size=(256, 256))],
-#         [NormalizeNumpy(), MaxScaleNumpy(0, 1.0)],
+#         [NormalizeNumpyImage(), CreateSegAndMask()],
 #         # for non-pytorch usage, remove to_tensor conversion
-#         [Lambda(to_tensor), Lambda(to_tensor)]
+#         [Lambda(to_float_tensor), Lambda(to_long_tensor),Lambda(to_long_tensor)]
 #     ])
 #     # read input data for test
 #     image_in = np.array(Image.open('input.jpg'))
