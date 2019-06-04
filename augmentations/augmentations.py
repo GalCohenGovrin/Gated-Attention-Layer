@@ -451,7 +451,7 @@ class NormalizeNumpyImage(object):
         image = image / self.mean_std[1]
         return image
     
-class CreateSegAndMask(object):
+class CreateSeg(object):
     """convert full segmentation mask classes to 0, 1, 2 and create attention mask
     """
 
@@ -461,11 +461,27 @@ class CreateSegAndMask(object):
         all_seg[all_seg == 127] = 1
         all_seg[all_seg == 255] = 2
         
-        mask_seg = np.zeros_like(all_seg)
-        mask_seg[all_seg == 1] = 1
-        mask_seg[all_seg == 2] = 1
+#         mask_seg = np.zeros_like(all_seg)
+#         mask_seg[all_seg == 1] = 1
+#         mask_seg[all_seg == 2] = 1
         
-        return all_seg, mask_seg
+        return all_seg
+    
+class CreateMask(object):
+    """convert full segmentation mask classes to 0, 1, 2 and create attention mask
+    """
+
+    def __init__(self):
+        pass
+    def __call__(self, mask_seg):
+#         mask_seg[mask_seg == 127] = 1
+        mask_seg[mask_seg == 255] = 1
+        
+#         mask_seg = np.zeros_like(all_seg)
+#         mask_seg[all_seg == 1] = 1
+#         mask_seg[all_seg == 2] = 1
+        
+        return mask_seg
 
 
 # if __name__ == '__main__':
