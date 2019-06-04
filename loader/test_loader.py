@@ -44,7 +44,7 @@ class GALoader(data.Dataset):
                 RandomRotate(),
                 ElasticTransform(),
                 Split([0, 1], [1, 2], [2,3]),
-                [NormalizeNumpyImage(), CreateSeg(), CreateMask()]
+                [NormalizeNumpyImage(), CreateSeg(), CreateMask()],
                 # for non-pytorch usage, remove to_tensor conversion
                 [to_float_tensor(), to_long_tensor(), to_long_tensor()]
             ])
@@ -54,9 +54,9 @@ class GALoader(data.Dataset):
 # #                 augmentations.RandomRotate(),
 # #                 augmentations.ElasticTransform(),
                 Split([0, 1], [1, 2], [2,3]),
-                [NormalizeNumpyImage(), CreateSeg(), CreateMask()]
+                [NormalizeNumpyImage(), CreateSeg(), CreateMask()],
                 # for non-pytorch usage, remove to_tensor conversion
-                [Lambda(to_float_tensor), Lambda(to_long_tensor),Lambda(to_long_tensor)]
+                [to_float_tensor(), to_long_tensor(), to_long_tensor()]
             ])
         
         for split in ["train", "val"]:
