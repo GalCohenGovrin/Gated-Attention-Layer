@@ -178,7 +178,7 @@ class GALoader(data.Dataset):
                     seg_name = "seg" + ii
                     img_path = pjoin(self.root, "train_val", "ct", split, img_name)
                     seg_path = pjoin(self.root, "train_val", "seg", split, seg_name)
-                    im = np.expand_dims(np.array(Image.open(im_path)), axis=-1)
+#                     im = np.expand_dims(np.array(Image.open(im_path)), axis=-1)
 #         all_seg = np.expand_dims(np.array(Image.open(all_seg_path)), axis=-1)
 #         mask_seg = np.expand_dims(np.array(Image.open(mask_seg_path)), axis=-1)
                     img = np.expand_dims(np.array(Image.open(img_path).convert('L')), axis=-1)
