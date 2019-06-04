@@ -133,6 +133,7 @@ class ElasticTransform(object):
     """
 
     def __init__(self): #, alpha, sigma):
+        pass
 #         self.alpha = alpha
 #         self.sigma = sigma
 
@@ -455,7 +456,7 @@ class CreateSegAndMask(object):
     """
 
     def __init__(self):
-
+        pass
     def __call__(self, all_seg):
         all_seg[all_seg == 127] = 1
         all_seg[all_seg == 255] = 2
