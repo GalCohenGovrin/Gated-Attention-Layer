@@ -78,8 +78,8 @@ class GALoader(data.Dataset):
         mask_seg_path = pjoin(self.root, "fixed_data", "mask_seg", self.split, "seg" + im_name)
         
         im = np.expand_dims(np.array(Image.open(im_path)), axis=-1)
-        all_seg = np.expand_dims(np.array(np.array(Image.open(all_seg_path)), axis=-1)
-        mask_seg = np.expand_dims(np.array(np.array(Image.open(mask_seg_path)), axis=-1)
+        all_seg = np.expand_dims(np.array(Image.open(all_seg_path)), axis=-1)
+        mask_seg = np.expand_dims(np.array(Image.open(mask_seg_path)), axis=-1)
         
 #         im = torch.from_numpy(np.array(im)/255.)
 #         im = torch.unsqueeze(im, 0).float()
