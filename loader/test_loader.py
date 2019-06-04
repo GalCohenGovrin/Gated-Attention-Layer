@@ -181,8 +181,8 @@ class GALoader(data.Dataset):
 #                     im = np.expand_dims(np.array(Image.open(im_path)), axis=-1)
 #         all_seg = np.expand_dims(np.array(Image.open(all_seg_path)), axis=-1)
 #         mask_seg = np.expand_dims(np.array(Image.open(mask_seg_path)), axis=-1)
-                    img = np.expand_dims(np.array(Image.open(img_path).convert('L')), axis=-1)
-                    all_seg = np.expand_dims(np.array(Image.open(seg_path).convert('L')), axis=-1)
+                    img = np.array(Image.open(img_path).convert('L'))
+                    all_seg = np.array(Image.open(seg_path).convert('L'))
                     mask_seg = np.zeros_like(all_seg)
                     
                     all_seg[all_seg == 127] = 1
@@ -199,7 +199,11 @@ class GALoader(data.Dataset):
                     fixed_img.save(pjoin(target_path, "ct", split, img_name), "PNG")
                     fixed_all_seg.save(pjoin(target_path, "all_seg", split, seg_name), "PNG")
                     fixed_mask_seg.save(pjoin(target_path, "mask_seg", split, seg_name), "PNG")
+            
                     if split == "train":
+                        img = np.expand_dims(img, axis=-1)
+                        all_seg = np.expand_dims(all_seg, axis=-1)
+                        mask_seg = np.expand_dims(mask_seg, axis=-1)
                         all_seg[all_seg == 1] = 127
                         all_seg[all_seg == 2] = 255
 
@@ -207,9 +211,9 @@ class GALoader(data.Dataset):
                         mask_seg[all_seg == 255] = 255
                         for i in range(self.data_mul):
                             aug_img, aug_all_seg , aug_mask_seg = aug_transforms([img, all_seg, mask_seg])
-                            fixed_img = Image.fromarray(aug_img)
-                            fixed_all_seg = Image.fromarray(aug_all_seg)
-                            fixed_mask_seg = Image.fromarray(aug_mask_seg)
+                            fixed_img = Image.fromarray(np.squeeze(aug_img))
+                            fixed_all_seg = Image.fromarray(np.squeeze(aug_all_seg))
+                            fixed_mask_seg = Image.fromarray(np.squeeze(aug_mask_seg))
                             img_name = "ct" + str(i) + ii
                             seg_name = "seg" + str(i)+ ii
                             fixed_img.save(pjoin(target_path, "ct", split, img_name), "PNG")
