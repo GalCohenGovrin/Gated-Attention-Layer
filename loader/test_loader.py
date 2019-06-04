@@ -39,8 +39,8 @@ class GALoader(data.Dataset):
         if self.is_train:
             self.augmentations = EnhancedCompose([
                 Merge(),
-#                 RandomRotate(),
-                ElasticTransform(),
+                RandomRotate(),
+#                 ElasticTransform(),
                 Split([0, 1], [1, 2], [2,3]),
                 [NormalizeNumpyImage(), CreateSeg(), CreateMask()]
                 # for non-pytorch usage, remove to_tensor conversion
