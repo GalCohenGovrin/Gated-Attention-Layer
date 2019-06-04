@@ -40,23 +40,23 @@ class GALoader(data.Dataset):
         self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
         if self.is_train:
             self.augmentations = EnhancedCompose([
-#                 Merge(),
-#                 RandomRotate(),
-#                 ElasticTransform(),
-#                 Split([0, 1], [1, 2], [2,3]),
+                Merge(),
+                RandomRotate(),
+                ElasticTransform(),
+                Split([0, 1], [1, 2], [2,3]),
                 [NormalizeNumpyImage(), CreateSeg(), CreateMask()]
                 # for non-pytorch usage, remove to_tensor conversion
-#                 [Lambda(to_float_tensor), Lambda(to_long_tensor),Lambda(to_long_tensor)]
+                [Lambda(to_float_tensor), Lambda(to_long_tensor),Lambda(to_long_tensor)]
             ])
         else:
             self.augmentations = EnhancedCompose([
-#                 Merge(),
+                Merge(),
 # #                 augmentations.RandomRotate(),
 # #                 augmentations.ElasticTransform(),
-#                 Split([0, 1], [1, 2], [2,3]),
+                Split([0, 1], [1, 2], [2,3]),
                 [NormalizeNumpyImage(), CreateSeg(), CreateMask()]
                 # for non-pytorch usage, remove to_tensor conversion
-#                 [Lambda(to_float_tensor), Lambda(to_long_tensor),Lambda(to_long_tensor)]
+                [Lambda(to_float_tensor), Lambda(to_long_tensor),Lambda(to_long_tensor)]
             ])
         
         for split in ["train", "val"]:
@@ -90,9 +90,13 @@ class GALoader(data.Dataset):
         all_seg_path = pjoin(self.root, "fixed_data", "all_seg", self.split, "seg" + im_name)
         mask_seg_path = pjoin(self.root, "fixed_data", "mask_seg", self.split, "seg" + im_name)
         
-#         im = np.expand_dims(np.array(Image.open(im_path)), axis=-1)
-#         all_seg = np.expand_dims(np.array(Image.open(all_seg_path)), axis=-1)
-#         mask_seg = np.expand_dims(np.array(Image.open(mask_seg_path)), axis=-1)
+        im = np.expand_dims(np.array(Image.open(im_path)), axis=-1)
+        all_seg = np.expand_dims(np.array(Image.open(all_seg_path)), axis=-1)
+        mask_seg = np.expand_dims(np.array(Image.open(mask_seg_path)), axis=-1)
+        
+#         im = Image.open(im_path)
+#         all_seg = Image.open(all_seg_path)
+#         mask_seg = Image.open(mask_seg_path)
         
 #         im = torch.from_numpy(np.array(im)/255.)
 #         im = torch.unsqueeze(im, 0).float()
@@ -100,29 +104,26 @@ class GALoader(data.Dataset):
 #         all_seg = torch.unsqueeze(all_seg, 0)
 #         mask_seg = torch.from_numpy(np.array(mask_seg)).long()
 #         mask_seg = torch.unsqueeze(mask_seg, 0)
-        im = Image.open(im_path)
-        all_seg = Image.open(all_seg_path)
-        mask_seg = Image.open(mask_seg_path)
         
-        im = torch.from_numpy(np.array(im)/255.)
-        im = torch.unsqueeze(im, 0).float()
-        all_seg = torch.from_numpy(np.array(all_seg)).long()
-        all_seg = torch.unsqueeze(all_seg, 0)
-        mask_seg = torch.from_numpy(np.array(mask_seg)).long()
-        mask_seg = torch.unsqueeze(mask_seg, 0)
-        
-# #         if self.augmentations is not None:
-#         im1, all_seg1, mask_seg1 = self.augmentations([im, all_seg, mask_seg])
-#         im1 = torch.from_numpy(im1.transpose((2, 0, 1))).float()
-#         all_seg1 = torch.from_numpy(all_seg1.transpose((2, 0, 1))).long()
-#         mask_seg1 = torch.from_numpy(mask_seg1.transpose((2, 0, 1))).long()
-#         im = torch.unsqueeze(im, 0)
-#         all_seg = torch.unsqueeze(all_seg, 0)
-#         mask_seg = torch.unsqueeze(mask_seg, 0)
-#             im, all_seg, mask_seg = self.augmentations(im, all_seg)
+        if self.augmentations is not None:
+            im, all_seg, mask_seg = self.augmentations([im, all_seg, mask_seg])
             
-        if self.is_transform:
-            im, all_seg, mask_seg = self.transform(im, all_seg, mask_seg)
+#             all_seg[(0<all_seg) & (all_seg<191)] = 1
+#             all_seg[all_seg >=191] = 2
+#             mask_seg
+            
+#             im = torch.from_numpy(im.transpose((2, 0, 1))).float()
+#             all_seg = torch.from_numpy(all_seg.transpose((2, 0, 1))).long()
+#             mask_seg = torch.from_numpy(mask_seg.transpose((2, 0, 1))).long()
+            
+            
+#             im = torch.unsqueeze(im, 0)
+#             all_seg = torch.unsqueeze(all_seg, 0)
+#             mask_seg = torch.unsqueeze(mask_seg, 0)
+# #             im, all_seg, mask_seg = self.augmentations(im, all_seg)
+            
+#         if self.is_transform:
+#             im, all_seg, mask_seg = self.transform(im, all_seg, mask_seg)
             
 #         return im1, all_seg1, mask_seg1
         return im, all_seg, mask_seg
@@ -140,15 +141,15 @@ class GALoader(data.Dataset):
 
     
     def setup_annotations(self):
-        aug_transforms = EnhancedCompose([
-            Merge(),
-#             RandomRotate(),
-            ElasticTransform(),
-            Split([0, 1], [1, 2], [2,3]),
-            [None, CreateSeg(), CreateMask()]
-            # for non-pytorch usage, remove to_tensor conversion
-    #                 [Lambda(to_float_tensor), Lambda(to_long_tensor),Lambda(to_long_tensor)]
-        ])
+#         aug_transforms = EnhancedCompose([
+#             Merge(),
+# #             RandomRotate(),
+#             ElasticTransform(),
+#             Split([0, 1], [1, 2], [2,3]),
+#             [None, CreateSeg(), CreateMask()]
+#             # for non-pytorch usage, remove to_tensor conversion
+#     #                 [Lambda(to_float_tensor), Lambda(to_long_tensor),Lambda(to_long_tensor)]
+#         ])
 
         target_path = pjoin(self.root, "fixed_data")
         if not os.path.exists(target_path):
@@ -185,11 +186,11 @@ class GALoader(data.Dataset):
                     all_seg = np.array(Image.open(seg_path).convert('L'))
                     mask_seg = np.zeros_like(all_seg)
                     
-                    all_seg[all_seg == 127] = 1
-                    all_seg[all_seg == 255] = 2
+#                     all_seg[all_seg == 127] = 1
+#                     all_seg[all_seg == 255] = 2
                     
-                    mask_seg[all_seg == 1] = 1
-                    mask_seg[all_seg == 2] = 1
+                    mask_seg[all_seg == 127] = 255
+                    mask_seg[all_seg == 255] = 255
                     
                     fixed_img = Image.fromarray(img)
                     fixed_all_seg = Image.fromarray(all_seg)
@@ -200,29 +201,29 @@ class GALoader(data.Dataset):
                     fixed_all_seg.save(pjoin(target_path, "all_seg", split, seg_name), "PNG")
                     fixed_mask_seg.save(pjoin(target_path, "mask_seg", split, seg_name), "PNG")
             
-                    if split == "train":
-                        img = np.expand_dims(img, axis=-1)
-                        all_seg = np.expand_dims(all_seg, axis=-1)
-                        mask_seg = np.expand_dims(mask_seg, axis=-1)
-                        all_seg[all_seg == 1] = 127
-                        all_seg[all_seg == 2] = 255
+#                     if split == "train":
+#                         img = np.expand_dims(img, axis=-1)
+#                         all_seg = np.expand_dims(all_seg, axis=-1)
+#                         mask_seg = np.expand_dims(mask_seg, axis=-1)
+#                         all_seg[all_seg == 1] = 127
+#                         all_seg[all_seg == 2] = 255
 
-                        mask_seg[all_seg == 127] = 255
-                        mask_seg[all_seg == 255] = 255
-                        for i in range(self.data_mul):
-                            aug_img, aug_all_seg , aug_mask_seg = aug_transforms([img, all_seg, mask_seg])
-                            aug_all_seg[aug_all_seg == 127] = 1
-                            aug_all_seg[aug_all_seg == 255] = 2
-                            aug_mask_seg[aug_mask_seg == 255] = 1
+#                         mask_seg[all_seg == 127] = 255
+#                         mask_seg[all_seg == 255] = 255
+#                         for i in range(self.data_mul):
+#                             aug_img, aug_all_seg , aug_mask_seg = aug_transforms([img, all_seg, mask_seg])
+#                             aug_all_seg[aug_all_seg == 127] = 1
+#                             aug_all_seg[aug_all_seg == 255] = 2
+#                             aug_mask_seg[aug_mask_seg == 255] = 1
                             
-                            fixed_img = Image.fromarray(np.squeeze(aug_img))
-                            fixed_all_seg = Image.fromarray(np.squeeze(aug_all_seg))
-                            fixed_mask_seg = Image.fromarray(np.squeeze(aug_mask_seg))
-                            img_name = "ct" + str(i) + ii
-                            seg_name = "seg" + str(i)+ ii
-                            fixed_img.save(pjoin(target_path, "ct", split, img_name), "PNG")
-                            fixed_all_seg.save(pjoin(target_path, "all_seg", split, seg_name), "PNG")
-                            fixed_mask_seg.save(pjoin(target_path, "mask_seg", split, seg_name), "PNG")
+#                             fixed_img = Image.fromarray(np.squeeze(aug_img))
+#                             fixed_all_seg = Image.fromarray(np.squeeze(aug_all_seg))
+#                             fixed_mask_seg = Image.fromarray(np.squeeze(aug_mask_seg))
+#                             img_name = "ct" + str(i) + ii
+#                             seg_name = "seg" + str(i)+ ii
+#                             fixed_img.save(pjoin(target_path, "ct", split, img_name), "PNG")
+#                             fixed_all_seg.save(pjoin(target_path, "all_seg", split, seg_name), "PNG")
+#                             fixed_mask_seg.save(pjoin(target_path, "mask_seg", split, seg_name), "PNG")
                         
                     
                     
