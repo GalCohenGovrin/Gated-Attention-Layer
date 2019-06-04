@@ -13,7 +13,7 @@ from PIL import Image
 from tqdm import tqdm
 from torch.utils import data
 from torchvision import transforms
-from utils.imageUtils import *
+from augmentations.augmentations import *
 from torchvision.transforms import Lambda
 
 
@@ -24,18 +24,30 @@ class GALoader(data.Dataset):
         root = '/content/Data/',
         split="train",
         is_transform=True,
-        img_size=512,
+        img_size=572,
         augmentations=None,
         test_mode=False,
     ):
         self.root = root
         self.split = split
         self.is_transform = is_transform
-        self.augmentations = augmentations
+        
         self.test_mode = test_mode
         self.n_classes = 3
         self.files = collections.defaultdict(list)
         self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
+        if augmentations is not None:
+            self.augmentations = augmentations
+        else:
+            self.augmentations = augmentations.EnhancedCompose([
+                augmentations.Merge(),
+#                 augmentations.RandomRotate(),
+#                 augmentations.ElasticTransform(),
+                augmentations.Split([0, input_channel], [input_channel, input_channel+target_channel]),
+                [augmentations.NormalizeNumpyImage(), augmentations.CreateSegAndMask()],
+                # for non-pytorch usage, remove to_tensor conversion
+                [Lambda(augmentations.to_float_tensor), Lambda(augmentations.to_long_tensor),Lambda(augmentations.to_long_tensor)]
+            ])
         
         for split in ["train", "val"]:
                 path = pjoin(self.root, split + ".txt")
@@ -46,14 +58,14 @@ class GALoader(data.Dataset):
         if not self.test_mode:
             self.setup_annotations()
             
-        else:
+        
 
-            self.tf = transforms.Compose(
-                [
-                    #transforms.ToTensor(),
-                    transforms.Normalize([0.192], [0.263]),
-                ]
-            )
+        self.tf = transforms.Compose(
+            [
+                #transforms.ToTensor(),
+                transforms.Normalize([0.192], [0.263]),
+            ]
+        )
 
     def __len__(self):
         return len(self.files[self.split])
@@ -63,28 +75,29 @@ class GALoader(data.Dataset):
         im_name = self.files[self.split][index]
         im_path = pjoin(self.root, "fixed_data", "ct", self.split, "ct" + im_name)
         all_seg_path = pjoin(self.root, "fixed_data", "all_seg", self.split, "seg" + im_name)
-        mask_seg_path = pjoin(self.root, "fixed_data", "mask_seg", self.split, "seg" + im_name)
+#         mask_seg_path = pjoin(self.root, "fixed_data", "mask_seg", self.split, "seg" + im_name)
         
-        im = Image.open(im_path)
-        all_seg = Image.open(all_seg_path)
-        mask_seg = Image.open(mask_seg_path)
+        im = np.array(Image.open(im_path))
+        all_seg = np.array(Image.open(all_seg_path))
+#         mask_seg = Image.open(mask_seg_path)
         
-        im = torch.from_numpy(np.array(im)/255.)
-        im = torch.unsqueeze(im, 0).float()
-        all_seg = torch.from_numpy(np.array(all_seg)).long()
-        all_seg = torch.unsqueeze(all_seg, 0)
-        mask_seg = torch.from_numpy(np.array(mask_seg)).long()
-        mask_seg = torch.unsqueeze(mask_seg, 0)
+#         im = torch.from_numpy(np.array(im)/255.)
+#         im = torch.unsqueeze(im, 0).float()
+#         all_seg = torch.from_numpy(np.array(all_seg)).long()
+#         all_seg = torch.unsqueeze(all_seg, 0)
+#         mask_seg = torch.from_numpy(np.array(mask_seg)).long()
+#         mask_seg = torch.unsqueeze(mask_seg, 0)
         
         if self.augmentations is not None:
-            im, all_seg, mask_seg = self.augmentations(im, all_seg, mask_seg)
+#             im, all_seg, mask_seg = self.augmentations(im, all_seg, mask_seg)
+            im, all_seg, mask_seg = self.augmentations(im, all_seg)
             
-        if self.is_transform:
-            im, all_seg, mask_seg = self.transform(im, all_seg, mask_seg)
+#         if self.is_transform:
+#             im, all_seg = self.transform(im, all_seg)#, mask_seg)
             
         return im, all_seg, mask_seg
 
-    def transform(self, img, all_seg, mask_seg):
+    def transform(self, img, all_seg):#, mask_seg):
         #if self.img_size == ("same", "same"):
          #   pass
         #else:
@@ -93,7 +106,7 @@ class GALoader(data.Dataset):
         img = self.tf(img)
         #all_seg = torch.from_numpy(np.array(all_seg)).long()
         
-        return img, all_seg, mask_seg
+        return img, all_seg#, mask_seg
 
     def setup_annotations(self):
 
@@ -103,7 +116,7 @@ class GALoader(data.Dataset):
             
             os.makedirs(pjoin(target_path, "ct"))
             os.makedirs(pjoin(target_path, "all_seg"))
-            os.makedirs(pjoin(target_path, "mask_seg"))
+#             os.makedirs(pjoin(target_path, "mask_seg"))
             
             os.makedirs(pjoin(target_path, "ct", "train"))
             os.makedirs(pjoin(target_path, "ct", "val"))
@@ -111,8 +124,8 @@ class GALoader(data.Dataset):
             os.makedirs(pjoin(target_path, "all_seg", "train"))
             os.makedirs(pjoin(target_path, "all_seg", "val"))
             
-            os.makedirs(pjoin(target_path, "mask_seg", "train"))
-            os.makedirs(pjoin(target_path, "mask_seg", "val"))
+#             os.makedirs(pjoin(target_path, "mask_seg", "train"))
+#             os.makedirs(pjoin(target_path, "mask_seg", "val"))
 
         pre_encoded = glob.glob(pjoin(target_path, "*.png"))
         expected = np.unique(self.files["train"] + self.files["val"]).size
@@ -128,21 +141,21 @@ class GALoader(data.Dataset):
                     
                     img = np.array(Image.open(img_path).convert('L'))
                     all_seg = np.array(Image.open(seg_path).convert('L'))
-                    mask_seg = np.zeros_like(all_seg)
+#                     mask_seg = np.zeros_like(all_seg)
                     
-                    all_seg[all_seg == 127] = 1
-                    all_seg[all_seg == 255] = 2
+#                     all_seg[all_seg == 127] = 1
+#                     all_seg[all_seg == 255] = 2
                     
-                    mask_seg[all_seg == 1] = 1
-                    mask_seg[all_seg == 2] = 1
+#                     mask_seg[all_seg == 1] = 1
+#                     mask_seg[all_seg == 2] = 1
                     
                     fixed_img = Image.fromarray(img)
                     fixed_all_seg = Image.fromarray(all_seg)
-                    fixed_mask_seg = Image.fromarray(mask_seg)
+#                     fixed_mask_seg = Image.fromarray(mask_seg)
                     
                     fixed_img.save(pjoin(target_path, "ct", split, img_name), "PNG")
                     fixed_all_seg.save(pjoin(target_path, "all_seg", split, seg_name), "PNG")
-                    fixed_mask_seg.save(pjoin(target_path, "mask_seg", split, seg_name), "PNG")
+#                     fixed_mask_seg.save(pjoin(target_path, "mask_seg", split, seg_name), "PNG")
                     
 def online_mean_and_sd(loader):
     """Compute the mean and sd in an online fashion
