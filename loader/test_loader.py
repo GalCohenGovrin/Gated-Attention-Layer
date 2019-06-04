@@ -39,14 +39,14 @@ class GALoader(data.Dataset):
         if augmentations is not None:
             self.augmentations = augmentations
         else:
-            self.augmentations = augmentations.EnhancedCompose([
-                augmentations.Merge(),
+            self.augmentations = EnhancedCompose([
+                Merge(),
 #                 augmentations.RandomRotate(),
 #                 augmentations.ElasticTransform(),
-                augmentations.Split([0, input_channel], [input_channel, input_channel+target_channel]),
-                [augmentations.NormalizeNumpyImage(), augmentations.CreateSegAndMask()],
+                Split([0, input_channel], [input_channel, input_channel+target_channel]),
+                [NormalizeNumpyImage(), augmentations.CreateSegAndMask()],
                 # for non-pytorch usage, remove to_tensor conversion
-                [Lambda(augmentations.to_float_tensor), Lambda(augmentations.to_long_tensor),Lambda(augmentations.to_long_tensor)]
+                [Lambda(to_float_tensor), Lambda(to_long_tensor),Lambda(to_long_tensor)]
             ])
         
         for split in ["train", "val"]:
