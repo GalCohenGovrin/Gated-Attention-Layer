@@ -24,7 +24,7 @@ class GALoader(data.Dataset):
         root = '/content/Data/',
         split="train",
         is_transform=True,
-        img_size=572,
+        img_size=512,
         augmentations=None,
         test_mode=False,
     ):
