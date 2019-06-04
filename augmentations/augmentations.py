@@ -364,9 +364,10 @@ class CenterCropNumpy(object):
 
 class RandomRotate(object):
     """Rotate a PIL.Image or numpy.ndarray (H x W x C) randomly
+    changed mode from reflect to constant
     """
 
-    def __init__(self, angle_range=(0.0, 360.0), axes=(0, 1), mode='reflect', random_state=np.random):
+    def __init__(self, angle_range=(0.0, 360.0), axes=(0, 1), mode='constant', random_state=np.random):
         assert isinstance(angle_range, tuple)
         self.angle_range = angle_range
         self.random_state = random_state
