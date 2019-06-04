@@ -76,7 +76,7 @@ class to_float_tensor(object):
     def __call__(self, x):
         x = x.transpose((2, 0, 1))
         x = torch.from_numpy(x).float()
-        x = torch.unsqueeze(x, 0)
+#         x = torch.unsqueeze(x, 0)
         return x
 
 class to_long_tensor(object):
@@ -86,7 +86,7 @@ class to_long_tensor(object):
     def __call__(self, x):
         x = x.transpose((2, 0, 1))
         x = torch.from_numpy(x).long()
-        x = torch.unsqueeze(x, 0)
+#         x = torch.unsqueeze(x, 0)
         return x
     
 
