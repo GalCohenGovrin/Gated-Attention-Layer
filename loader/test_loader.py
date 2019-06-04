@@ -101,6 +101,9 @@ class GALoader(data.Dataset):
         im = torch.from_numpy(im.transpose((2, 0, 1))).float()
         all_seg = torch.from_numpy(all_seg.transpose((2, 0, 1))).long()
         mask_seg = torch.from_numpy(mask_seg.transpose((2, 0, 1))).long()
+        im = torch.unsqueeze(im, 0)
+        all_seg = torch.unsqueeze(all_seg, 0)
+        mask_seg = torch.unsqueeze(mask_seg, 0)
 #             im, all_seg, mask_seg = self.augmentations(im, all_seg)
             
 #         if self.is_transform:
