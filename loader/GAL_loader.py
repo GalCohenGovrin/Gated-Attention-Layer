@@ -103,12 +103,15 @@ class GALoader(data.Dataset):
             
             os.makedirs(pjoin(target_path, "ct", "train"))
             os.makedirs(pjoin(target_path, "ct", "val"))
+            os.makedirs(pjoin(target_path, "ct", "test"))
             
             os.makedirs(pjoin(target_path, "all_seg", "train"))
             os.makedirs(pjoin(target_path, "all_seg", "val"))
+            os.makedirs(pjoin(target_path, "all_seg", "test"))
             
             os.makedirs(pjoin(target_path, "mask_seg", "train"))
             os.makedirs(pjoin(target_path, "mask_seg", "val"))
+            os.makedirs(pjoin(target_path, "mask_seg", "test"))
 
         pre_encoded = glob.glob(pjoin(target_path, "*.png"))
         expected = np.unique(self.files["train"] + self.files["val"]).size
@@ -139,6 +142,15 @@ class GALoader(data.Dataset):
                     fixed_img.save(pjoin(target_path, "ct", split, img_name), "PNG")
                     fixed_all_seg.save(pjoin(target_path, "all_seg", split, seg_name), "PNG")
                     fixed_mask_seg.save(pjoin(target_path, "mask_seg", split, seg_name), "PNG")
+                    
+            for ii in tqdm(self.files["test"]):
+                img_name = "ct" + ii
+                img_path = pjoin(self.root, "test", img_name)
+
+                img = np.array(Image.open(img_path).convert('L'))
+                fixed_img = Image.fromarray(img)
+
+                fixed_img.save(pjoin(target_path, "ct", "test", img_name), "PNG")
                     
 def online_mean_and_sd(loader):
     """Compute the mean and sd in an online fashion
