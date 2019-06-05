@@ -16,14 +16,12 @@ from torchvision import transforms
 
 
 class TestLoader(data.Dataset):
-  """loader of test data only
-  """
     def __init__(
         self,
         root = '/content/Data/',
         is_transform=True,
         img_size=512,
-        test_mode=False,
+        test_mode=False
     ):
         self.root = root
         self.split = "test"
