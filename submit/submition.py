@@ -19,7 +19,7 @@ def save_predictions(preds, name, root = '/content/Data/'):
     pred_liver = pred_mask[1, :, :]
     pred_lesion = pred_mask[2, :, :]
     
-    final_mask = np.zeros_like(pred_bg, dtype=int)
+    final_mask = np.zeros_like(pred_bg, dtype=int8)
     
     final_mask[pred_liver == 1] = 127
     final_mask[pred_lesion == 1] = 255
