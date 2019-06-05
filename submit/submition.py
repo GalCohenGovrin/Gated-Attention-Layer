@@ -24,8 +24,8 @@ def save_predictions(preds, name, root = '/content/Data/'):
     final_mask[pred_liver == 1] = 127
     final_mask[pred_lesion == 1] = 255
     
-    img_name = "seg" + name
-    path = pjoin(root, "fixed_data", "seg", "test",  im_name)
+    img_name = "seg" + name[0]
+    path = pjoin(root, "fixed_data", "seg", "test",  img_name)
     fixed_all_seg = Image.fromarray(final_mask)
     fixed_all_seg.save(pjoin(path), "PNG")
     
