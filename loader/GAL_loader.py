@@ -22,7 +22,7 @@ class GALoader(data.Dataset):
         root = '/content/Data/',
         split="train",
         is_transform=True,
-        img_size=572,
+        img_size=512,
         augmentations=None,
         test_mode=False,
     ):
@@ -35,7 +35,7 @@ class GALoader(data.Dataset):
         self.files = collections.defaultdict(list)
         self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
         
-        for split in ["train", "val"]:
+        for split in ["train", "val", "test"]:
                 path = pjoin(self.root, split + ".txt")
                 file_list = tuple(open(path, "r"))
                 file_list = [id_.rstrip() for id_ in file_list]
