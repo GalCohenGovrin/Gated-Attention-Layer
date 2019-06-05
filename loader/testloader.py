@@ -39,8 +39,8 @@ class TestLoader(data.Dataset):
                 file_list = [id_.rstrip() for id_ in file_list]
                 self.files[split] = file_list
 
-        if not self.test_mode:
-            self.setup_annotations()
+#         if not self.test_mode:
+#             self.setup_annotations()
 
         self.tf = transforms.Compose(
             [
@@ -55,7 +55,7 @@ class TestLoader(data.Dataset):
     #TODO: fix path to correct data
     def __getitem__(self, index):
         im_name = self.files[self.split][index]
-        im_path = pjoin(self.root, "test", "ct" + im_name)
+        im_path = pjoin(self.root, "fixed_data", "ct", self.split, "ct" + im_name)
         #all_seg_path = pjoin(self.root, "fixed_data", "all_seg", self.split, "seg" + im_name)
         #mask_seg_path = pjoin(self.root, "fixed_data", "mask_seg", self.split, "seg" + im_name)
         
@@ -65,20 +65,16 @@ class TestLoader(data.Dataset):
         
         im = torch.from_numpy(np.array(im)/255.)
         im = torch.unsqueeze(im, 0).float()
-        all_seg = torch.from_numpy(np.array(all_seg)).long()
-        all_seg = torch.unsqueeze(all_seg, 0)
-        mask_seg = torch.from_numpy(np.array(mask_seg)).long()
-        mask_seg = torch.unsqueeze(mask_seg, 0)
         
         if self.augmentations is not None:
-            im, all_seg, mask_seg = self.augmentations(im, all_seg, mask_seg)
+            im = self.augmentations(im)
             
         if self.is_transform:
-            im, all_seg, mask_seg = self.transform(im, all_seg, mask_seg)
+            im = self.transform(im)
             
         return im, all_seg, mask_seg
 
-    def transform(self, img, all_seg, mask_seg):
+    def transform(self, img):
         #if self.img_size == ("same", "same"):
          #   pass
         #else:
@@ -87,58 +83,58 @@ class TestLoader(data.Dataset):
         img = self.tf(img)
         #all_seg = torch.from_numpy(np.array(all_seg)).long()
         
-        return img, all_seg, mask_seg
+        return img
 
-    def setup_annotations(self):
+#     def setup_annotations(self):
 
-        target_path = pjoin(self.root, "fixed_data")
-        if not os.path.exists(target_path):
-            os.makedirs(target_path)
+#         target_path = pjoin(self.root, "fixed_data")
+#         if not os.path.exists(target_path):
+#             os.makedirs(target_path)
             
-            os.makedirs(pjoin(target_path, "ct"))
-            os.makedirs(pjoin(target_path, "all_seg"))
-            os.makedirs(pjoin(target_path, "mask_seg"))
+#             os.makedirs(pjoin(target_path, "ct"))
+#             os.makedirs(pjoin(target_path, "all_seg"))
+#             os.makedirs(pjoin(target_path, "mask_seg"))
             
-            os.makedirs(pjoin(target_path, "ct", "train"))
-            os.makedirs(pjoin(target_path, "ct", "val"))
-            os.makedirs(pjoin(target_path, "ct", "test"))
+#             os.makedirs(pjoin(target_path, "ct", "train"))
+#             os.makedirs(pjoin(target_path, "ct", "val"))
+#             os.makedirs(pjoin(target_path, "ct", "test"))
             
-            os.makedirs(pjoin(target_path, "all_seg", "train"))
-            os.makedirs(pjoin(target_path, "all_seg", "val"))
-            os.makedirs(pjoin(target_path, "all_seg", "val"))
+#             os.makedirs(pjoin(target_path, "all_seg", "train"))
+#             os.makedirs(pjoin(target_path, "all_seg", "val"))
+#             os.makedirs(pjoin(target_path, "all_seg", "val"))
             
-            os.makedirs(pjoin(target_path, "mask_seg", "train"))
-            os.makedirs(pjoin(target_path, "mask_seg", "val"))
+#             os.makedirs(pjoin(target_path, "mask_seg", "train"))
+#             os.makedirs(pjoin(target_path, "mask_seg", "val"))
 
-        pre_encoded = glob.glob(pjoin(target_path, "*.png"))
-        expected = np.unique(self.files["train"] + self.files["val"]).size
+#         pre_encoded = glob.glob(pjoin(target_path, "*.png"))
+#         expected = np.unique(self.files["train"] + self.files["val"]).size
 
-        if len(pre_encoded) != expected:
-            print("Pre-encoding segmentation masks...")
-            for split in ["test"]:
-                for ii in tqdm(self.files[split]):
-                    img_name = "ct" + ii
-                    #seg_name = "seg" + ii
-                    img_path = pjoin(self.root, split, img_name)
-                    #seg_path = pjoin(self.root, "train_val", "seg", split, seg_name)
+#         if len(pre_encoded) != expected:
+#             print("Pre-encoding segmentation masks...")
+#             for split in ["test"]:
+#                 for ii in tqdm(self.files[split]):
+#                     img_name = "ct" + ii
+#                     #seg_name = "seg" + ii
+#                     img_path = pjoin(self.root, split, img_name)
+#                     #seg_path = pjoin(self.root, "train_val", "seg", split, seg_name)
                     
-                    img = np.array(Image.open(img_path).convert('L'))
-                    #all_seg = np.array(Image.open(seg_path).convert('L'))
-                    #mask_seg = np.zeros_like(all_seg)
+#                     img = np.array(Image.open(img_path).convert('L'))
+#                     #all_seg = np.array(Image.open(seg_path).convert('L'))
+#                     #mask_seg = np.zeros_like(all_seg)
                     
-                    #all_seg[all_seg == 127] = 1
-                    #all_seg[all_seg == 255] = 2
+#                     #all_seg[all_seg == 127] = 1
+#                     #all_seg[all_seg == 255] = 2
                     
-                    #mask_seg[all_seg == 1] = 1
-                    #mask_seg[all_seg == 2] = 1
+#                     #mask_seg[all_seg == 1] = 1
+#                     #mask_seg[all_seg == 2] = 1
                     
-                    fixed_img = Image.fromarray(img)
-                    #fixed_all_seg = Image.fromarray(all_seg)
-                    fixed_mask_seg = Image.fromarray(mask_seg)
+#                     fixed_img = Image.fromarray(img)
+#                     #fixed_all_seg = Image.fromarray(all_seg)
+#                     fixed_mask_seg = Image.fromarray(mask_seg)
                     
-                    fixed_img.save(pjoin(target_path, "ct", split, img_name), "PNG")
-                    fixed_all_seg.save(pjoin(target_path, "all_seg", split, seg_name), "PNG")
-                    fixed_mask_seg.save(pjoin(target_path, "mask_seg", split, seg_name), "PNG")
+#                     fixed_img.save(pjoin(target_path, "ct", split, img_name), "PNG")
+#                     fixed_all_seg.save(pjoin(target_path, "all_seg", split, seg_name), "PNG")
+#                     fixed_mask_seg.save(pjoin(target_path, "mask_seg", split, seg_name), "PNG")
                     
 def online_mean_and_sd(loader):
     """Compute the mean and sd in an online fashion
