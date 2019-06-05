@@ -72,7 +72,7 @@ class TestLoader(data.Dataset):
         if self.is_transform:
             im = self.transform(im)
             
-        return im, all_seg, mask_seg
+        return im, im_name
 
     def transform(self, img):
         #if self.img_size == ("same", "same"):
