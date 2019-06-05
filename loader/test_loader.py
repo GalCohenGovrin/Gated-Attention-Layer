@@ -42,7 +42,7 @@ class GALoader(data.Dataset):
             self.augmentations = EnhancedCompose([
                 Merge(),
                 RandomRotate(),
-                ElasticTransform(),
+#                 ElasticTransform(),
                 Split([0, 1], [1, 2], [2,3]),
                 [NormalizeNumpyImage(), CreateSeg(), CreateMask()],
                 # for non-pytorch usage, remove to_tensor conversion
