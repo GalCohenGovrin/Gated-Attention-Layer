@@ -64,9 +64,6 @@ class TestLoader(data.Dataset):
         im = torch.from_numpy(np.array(im)/255.)
         im = torch.unsqueeze(im, 0).float()
         
-        if self.augmentations is not None:
-            im = self.augmentations(im)
-            
         if self.is_transform:
             im = self.transform(im)
             
