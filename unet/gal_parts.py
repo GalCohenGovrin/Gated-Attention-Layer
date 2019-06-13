@@ -120,7 +120,7 @@ class final_up(nn.Module):
         all_seg1 = self.cls_conv(x)
         mask_seg = self.mask_conv(x)
         
-        sigmo_mask = 2.*F.relu(self.sigmoid(F.relu(mask_seg))-0.5)
+        sigmo_mask = F.relu(self.sigmoid(F.relu(mask_seg))-0.5)
 #         sigmo_mask = F.softmax(mask_seg, dim=1)
         atn_mask = F.relu(self.gAttention(sigmo_mask))
 #         atn_mask2= F.relu(self.test_conv(atn_mask))
